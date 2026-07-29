@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .ambient-shadow {
+    box-shadow: 0 12px 32px rgba(26, 35, 126, 0.06);
+  }
+
+  .hover-lift {
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    box-shadow: 0 20px 40px rgba(26, 35, 126, 0.1);
+    transform: translateY(-4px);
+  }
+
+  .blob-mask-1 {
+    clip-path: polygon(10% 0, 100% 15%, 90% 100%, 0 85%);
+  }
+
+  .blob-mask-2 {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    clip-path: circle(50% at 50% 50%);
+  }
+
+  .progress-fill {
+    animation: fill-progress 1.5s ease-out forwards;
+  }
+
+  .glossy-cta {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .glossy-cta::after {
+    animation: glossy-sweep 1.5s ease-in-out infinite;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.18) 42%,
+      rgba(255, 255, 255, 0.7) 50%,
+      rgba(255, 255, 255, 0.18) 58%,
+      transparent 100%
+    );
+    content: "";
+    inset: -40% auto -40% -75%;
+    pointer-events: none;
+    position: absolute;
+    transform: skewX(-18deg);
+    width: 55%;
+  }
+}
+
+@keyframes fill-progress {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes glossy-sweep {
+  0% {
+    left: -75%;
+  }
+
+  58%,
+  100% {
+    left: 125%;
+  }
+}
