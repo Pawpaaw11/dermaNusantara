@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" data-scroll-behavior="smooth">
+    <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
         className={`${figtree.variable} ${nunitoSans.variable} bg-background text-body-md font-body-md text-on-background antialiased`}
       >
