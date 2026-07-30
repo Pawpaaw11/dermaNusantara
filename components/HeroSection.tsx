@@ -61,13 +61,13 @@ export function HeroSection() {
   return (
     <section
       aria-label="Sorotan kampanye Derma Nusantara"
-      className="relative -mt-[76px] w-full"
+      className="relative -mt-[76px] w-full bg-background px-margin-mobile pb-margin-mobile pt-0 md:px-0 md:pb-0"
     >
       <h1 className="sr-only">{hero.title}</h1>
 
       <div
         aria-roledescription="carousel"
-        className="group relative h-[100svh] min-h-[540px] overflow-hidden bg-surface-container-low"
+        className="group relative h-[58svh] min-h-[320px] max-h-[520px] overflow-hidden bg-surface-container-low md:h-[100svh] md:min-h-[540px] md:max-h-none"
         onBlur={() => setIsPaused(false)}
         onFocus={() => setIsPaused(true)}
       >
@@ -75,7 +75,7 @@ export function HeroSection() {
           {heroSlides.map((slide, index) => (
             <Image
               alt={slide.alt}
-              className={`absolute inset-0 object-cover transition-opacity duration-700 ease-out ${
+              className={`absolute inset-0 object-contain object-top transition-opacity duration-700 ease-out md:object-cover md:object-center ${
                 activeSlide === index ? "opacity-100" : "opacity-0"
               }`}
               fill
@@ -89,7 +89,7 @@ export function HeroSection() {
 
         <button
           aria-label="Tampilkan banner sebelumnya"
-          className="absolute left-3 top-1/2 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface/90 text-primary shadow-sm transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary md:left-8 md:size-12"
+          className="absolute left-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/90 text-primary shadow-sm transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary md:left-8 md:size-12"
           onClick={goToPreviousSlide}
           type="button"
         >
@@ -98,7 +98,7 @@ export function HeroSection() {
 
         <button
           aria-label="Tampilkan banner berikutnya"
-          className="absolute right-3 top-1/2 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface/90 text-primary shadow-sm transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary md:right-8 md:size-12"
+          className="absolute right-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface/90 text-primary shadow-sm transition hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary md:right-8 md:size-12"
           onClick={goToNextSlide}
           type="button"
         >

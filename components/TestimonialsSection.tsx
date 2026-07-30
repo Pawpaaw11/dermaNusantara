@@ -4,53 +4,53 @@ import { testimonials } from "@/data/landing-page";
 
 export function TestimonialsSection() {
   return (
-    <section className="bg-surface-container px-margin-mobile py-24 md:px-margin-desktop">
+    <section className="bg-surface-container px-margin-mobile py-16 md:px-margin-desktop md:py-24">
       <div className="mx-auto max-w-container-max">
-        <div className="mb-14 grid gap-5 md:grid-cols-[0.8fr_1.2fr] md:items-end">
+        <div className="mb-9 grid gap-4 md:mb-14 md:grid-cols-[0.8fr_1.2fr] md:items-end md:gap-5">
           <div>
-            <span className="mb-4 inline-flex w-fit rounded bg-secondary px-4 py-2 font-label-sm text-label-sm text-on-secondary">
+            <span className="mb-3 inline-flex w-fit rounded bg-secondary px-3 py-1.5 font-label-sm text-label-sm text-on-secondary md:mb-4 md:px-4 md:py-2">
               Suara Kebaikan
             </span>
             <h2 className="font-headline-md text-headline-md text-primary">
               Testimoni
             </h2>
           </div>
-          <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant md:justify-self-end">
+          <p className="max-w-2xl font-body-lg text-[1rem] leading-7 text-on-surface-variant md:justify-self-end md:text-body-lg">
             Kepercayaan lahir dari pengalaman nyata para tokoh, relawan, dan
             sahabat yang melihat langsung bagaimana amanah dikelola.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
           {testimonials.map((testimonial) => (
             <article
-              className="ambient-shadow hover-lift relative flex min-h-[340px] flex-col overflow-hidden rounded-lg border border-outline-variant/40 bg-surface"
+              className="ambient-shadow hover-lift relative mx-auto flex w-full max-w-[20.5rem] flex-col overflow-hidden rounded-lg border border-outline-variant/40 bg-surface md:min-h-[340px] md:max-w-none"
               key={testimonial.name}
             >
-              <div className="h-2 bg-primary" />
+              <div className="h-1.5 bg-primary md:h-2" />
 
-              <div className="flex flex-1 flex-col p-7">
-                <div className="mb-7 flex items-center justify-between gap-4">
-                  <div className="relative size-16 overflow-hidden rounded-full border-4 border-secondary/35 bg-surface-container-low">
+              <div className="flex flex-1 flex-col p-5 md:p-7">
+                <div className="mb-5 flex items-center justify-between gap-4 md:mb-7">
+                  <div className="relative size-12 overflow-hidden rounded-full border-[3px] border-secondary/35 bg-surface-container-low md:size-16 md:border-4">
                     <Image
                       alt={testimonial.image.alt}
                       className="object-cover"
                       fill
-                      sizes="64px"
+                      sizes="(min-width: 768px) 64px, 48px"
                       src={testimonial.image.src}
                     />
                   </div>
-                  <div className="flex size-12 items-center justify-center rounded-full bg-tertiary-container text-on-tertiary-container">
-                    <Quote aria-hidden size={22} fill="currentColor" />
+                  <div className="flex size-9 items-center justify-center rounded-full bg-tertiary-container text-on-tertiary-container md:size-12">
+                    <Quote aria-hidden size={18} fill="currentColor" />
                   </div>
                 </div>
 
-                <p className="font-body-md text-body-md italic leading-7 text-on-surface-variant">
+                <p className="font-body-md text-[0.95rem] italic leading-6 text-on-surface-variant md:text-body-md md:leading-7">
                   &ldquo;{testimonial.quote}&rdquo;
                 </p>
 
-                <div className="mt-auto pt-8">
-                  <div className="mb-4 h-px w-full bg-outline-variant/50" />
+                <div className="mt-auto pt-6 md:pt-8">
+                  <div className="mb-3 h-px w-full bg-outline-variant/50 md:mb-4" />
                   <p className="font-label-md text-label-md text-primary">
                     {testimonial.name}
                   </p>

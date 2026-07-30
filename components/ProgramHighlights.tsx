@@ -5,11 +5,11 @@ import { programs } from "@/data/landing-page";
 export function ProgramHighlights() {
   return (
     <section
-      className="bg-surface-container px-margin-mobile py-24 md:px-margin-desktop"
+      className="bg-surface-container px-margin-mobile py-16 md:px-margin-desktop md:py-24"
       id="programs"
     >
       <div className="mx-auto max-w-container-max">
-        <div className="mb-16 space-y-4 text-center">
+        <div className="mb-10 space-y-3 text-center md:mb-16 md:space-y-4">
           <h2 className="font-headline-md text-headline-md text-primary">
             Program Kebaikan
           </h2>
@@ -19,13 +19,13 @@ export function ProgramHighlights() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
           {programs.map((program) => (
             <article
-              className="ambient-shadow hover-lift relative flex flex-col overflow-hidden rounded-lg border border-outline-variant/40 bg-surface"
+              className="ambient-shadow hover-lift relative mx-auto flex w-full max-w-[20.5rem] flex-col overflow-hidden rounded-lg border border-outline-variant/40 bg-surface md:max-w-none"
               key={program.title}
             >
-              <div className="relative h-44 overflow-hidden">
+              <div className="relative h-36 overflow-hidden md:h-44">
                 <Image
                   alt={program.image.alt}
                   className="object-cover transition-transform duration-500 hover:scale-105"
@@ -34,40 +34,40 @@ export function ProgramHighlights() {
                   src={program.image.src}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/25 to-transparent" />
-                <div className="absolute left-5 top-5 rounded bg-primary px-3 py-2 font-label-sm text-label-sm text-on-primary shadow-sm">
+                <div className="absolute left-4 top-4 rounded bg-primary px-2.5 py-1.5 font-label-sm text-label-sm text-on-primary shadow-sm md:left-5 md:top-5 md:px-3 md:py-2">
                   {program.category} Derma Nusantara
                 </div>
-                <p className="absolute bottom-5 left-5 max-w-[220px] font-headline-sm text-headline-sm uppercase text-on-primary">
+                <p className="absolute bottom-4 left-4 max-w-[190px] font-headline-sm text-[1.1rem] font-bold uppercase leading-6 text-on-primary md:bottom-5 md:left-5 md:max-w-[220px] md:text-headline-sm">
                   {program.title}
                 </p>
               </div>
 
-              <div className="flex flex-grow flex-col px-5 pt-0">
-                <div className="-mt-px mb-5 w-fit rounded-br-lg bg-secondary px-4 py-2 font-label-md text-label-md text-on-secondary">
+              <div className="flex flex-grow flex-col px-4 pt-0 md:px-5">
+                <div className="-mt-px mb-4 w-fit rounded-br-lg bg-secondary px-3 py-1.5 font-label-md text-label-md text-on-secondary md:mb-5 md:px-4 md:py-2">
                   {program.category} Pelosok Negeri
                 </div>
 
-                <h3 className="font-headline-sm text-headline-sm text-primary">
+                <h3 className="font-headline-sm text-[1.15rem] font-bold leading-6 text-primary md:text-headline-sm">
                   {program.title}
                 </h3>
-                <p className="mt-3 line-clamp-2 font-body-md text-body-md text-on-surface-variant">
+                <p className="mt-2 line-clamp-2 font-body-md text-[0.95rem] leading-6 text-on-surface-variant md:mt-3 md:text-body-md">
                   {program.description}
                 </p>
 
-                <div className="mt-auto pt-6">
-                  <p className="font-body-md text-body-md text-outline">
+                <div className="mt-auto pt-5 md:pt-6">
+                  <p className="font-body-md text-[0.95rem] leading-6 text-outline md:text-body-md">
                     Perolehan
                   </p>
                   <div className="mt-1 flex items-end justify-between gap-4">
-                    <p className="font-headline-sm text-headline-sm text-primary">
+                    <p className="font-headline-sm text-[1.15rem] font-bold leading-6 text-primary md:text-headline-sm">
                       {program.collected}
                     </p>
-                    <p className="font-headline-sm text-headline-sm text-primary">
+                    <p className="font-headline-sm text-[1.15rem] font-bold leading-6 text-primary md:text-headline-sm">
                       {program.progress}%
                     </p>
                   </div>
 
-                  <div className="mt-5 h-3 w-full overflow-hidden rounded-full bg-surface-variant">
+                  <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-surface-variant md:mt-5 md:h-3">
                     <div
                       className="progress-fill h-full rounded-full bg-secondary"
                       style={{ width: `${program.progress}%` }}
@@ -76,8 +76,8 @@ export function ProgramHighlights() {
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-outline-variant/30 bg-surface-container-low px-5 py-4">
-                <span className="font-body-md text-body-md text-outline">
+              <div className="mt-5 flex items-center justify-between border-t border-outline-variant/30 bg-surface-container-low px-4 py-3 md:mt-6 md:px-5 md:py-4">
+                <span className="font-body-md text-[0.95rem] leading-6 text-outline md:text-body-md">
                   Target
                 </span>
                 <span className="font-label-md text-label-md text-primary">
@@ -86,7 +86,7 @@ export function ProgramHighlights() {
               </div>
 
               <Link
-                className="block w-full bg-primary py-4 text-center font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container focus-visible:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim"
+                className="block w-full bg-primary py-3.5 text-center font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container focus-visible:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim md:py-4"
                 href={`/donasi/${program.slug}`}
               >
                 Donasi
