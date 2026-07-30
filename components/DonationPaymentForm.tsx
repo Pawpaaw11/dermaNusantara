@@ -1,15 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   Banknote,
   CheckCircle2,
   Landmark,
-  MessageSquareHeart,
   Minus,
   Plus,
   ShieldCheck,
   Wallet,
+  X,
 } from "lucide-react";
 import type { Program } from "@/data/landing-page";
 
@@ -62,6 +63,7 @@ export function DonationPaymentForm({
   const [customAmount, setCustomAmount] = useState("");
   const [quantity, setQuantity] = useState(defaultQuantity);
   const [selectedMethod, setSelectedMethod] = useState(paymentMethods[0].id);
+  const [donorName, setDonorName] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
 
@@ -83,6 +85,22 @@ export function DonationPaymentForm({
   const selectedMethodLabel =
     paymentMethods.find((method) => method.id === selectedMethod)?.label ??
     paymentMethods[0].label;
+  const displayDonorName =
+    anonymous || donorName.trim().length === 0
+      ? "Hamba Allah"
+      : donorName.trim();
+  const invoiceSearchParams = new URLSearchParams({
+    amount: String(donationAmount),
+    donor: displayDonorName,
+    method: selectedMethod,
+    program: program.slug,
+  });
+
+  if (isQuantityMode) {
+    invoiceSearchParams.set("quantity", String(quantity));
+  }
+
+  const invoiceHref = `/invoice?${invoiceSearchParams.toString()}`;
 
   return (
     <div className="lg:sticky lg:top-28">
@@ -240,8 +258,10 @@ export function DonationPaymentForm({
 
             <input
               className="w-full rounded-2xl border border-outline-variant bg-surface px-4 py-3 font-body-md text-body-md text-on-background outline-none transition-colors placeholder:text-outline focus:border-secondary"
+              onChange={(event) => setDonorName(event.target.value)}
               placeholder="Nama lengkap"
               type="text"
+              value={donorName}
             />
 
             <label className="flex items-center gap-3 rounded-2xl border border-outline-variant/60 bg-surface-container px-4 py-3">
@@ -310,35 +330,6 @@ export function DonationPaymentForm({
             </div>
           </div>
 
-          <div className="rounded-[28px] bg-surface-container p-5">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex size-11 items-center justify-center rounded-full bg-secondary/20 text-secondary">
-                <ShieldCheck size={20} />
-              </div>
-              <div className="space-y-2">
-                <p className="font-label-md text-label-md text-primary">
-                  Ringkasan amanah
-                </p>
-                <div className="space-y-1 font-body-md text-body-md text-on-surface-variant">
-                  <p>Program: {program.title}</p>
-                  <p>
-                    {isQuantityMode ? "Total: " : "Nominal: "}
-                    <span className="font-semibold text-primary">
-                      {formatCurrency(Math.max(donationAmount, 0))}
-                    </span>
-                  </p>
-                  {isQuantityMode ? (
-                    <p>
-                      {program.quantityLabel}: {quantity} Quran
-                    </p>
-                  ) : null}
-                  <p>Metode: {selectedMethodLabel}</p>
-                  <p>Nama tampil: {anonymous ? "Hamba Allah" : "Nama asli"}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <button
             className="hover-lift flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:bg-outline disabled:hover:transform-none"
             disabled={!isAmountValid}
@@ -353,28 +344,74 @@ export function DonationPaymentForm({
               Nominal belum memenuhi batas minimal donasi.
             </p>
           ) : null}
-
-          {showSummary ? (
-            <div className="rounded-[28px] border border-secondary/30 bg-secondary/10 p-5">
-              <div className="flex items-start gap-3">
-                <div className="flex size-11 items-center justify-center rounded-full bg-secondary text-on-secondary">
-                  <MessageSquareHeart size={18} />
-                </div>
-                <div>
-                  <p className="font-label-md text-label-md text-primary">
-                    Ringkasan pembayaran siap ditinjau
-                  </p>
-                  <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
-                    {isQuantityMode
-                      ? `${quantity} Quran senilai ${formatCurrency(donationAmount)} untuk ${program.title} melalui ${selectedMethodLabel}.`
-                      : `${formatCurrency(donationAmount)} untuk ${program.title} melalui ${selectedMethodLabel}.`}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : null}
         </form>
       </div>
+
+      {showSummary ? (
+        <div
+          aria-labelledby="donation-summary-title"
+          aria-modal="true"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-inverse-surface/45 px-margin-mobile backdrop-blur-sm"
+          role="dialog"
+        >
+          <div className="ambient-shadow w-full max-w-md overflow-hidden rounded-[28px] border border-outline-variant/40 bg-surface">
+            <div className="flex items-center justify-between gap-4 border-b border-outline-variant/40 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="flex size-11 items-center justify-center rounded-full bg-secondary/20 text-secondary">
+                  <ShieldCheck size={20} />
+                </div>
+                <p
+                  className="font-label-md text-label-md text-primary"
+                  id="donation-summary-title"
+                >
+                  Ringkasan amanah
+                </p>
+              </div>
+              <button
+                aria-label="Tutup ringkasan amanah"
+                className="flex size-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary"
+                onClick={() => setShowSummary(false)}
+                type="button"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-3 px-6 py-6 font-body-md text-body-md text-on-surface-variant">
+              <p>Program: {program.title}</p>
+              <p>
+                {isQuantityMode ? "Total: " : "Nominal: "}
+                <span className="font-semibold text-primary">
+                  {formatCurrency(Math.max(donationAmount, 0))}
+                </span>
+              </p>
+              {isQuantityMode ? (
+                <p>
+                  {program.quantityLabel}: {quantity} Quran
+                </p>
+              ) : null}
+              <p>Metode: {selectedMethodLabel}</p>
+              <p>Nama tampil: {displayDonorName}</p>
+            </div>
+
+            <div className="grid gap-3 bg-surface-container px-6 py-5 sm:grid-cols-2">
+              <button
+                className="rounded-full border border-outline-variant bg-surface px-6 py-3 font-label-md text-label-md text-primary transition-colors hover:bg-primary-fixed/30"
+                onClick={() => setShowSummary(false)}
+                type="button"
+              >
+                Periksa Lagi
+              </button>
+              <Link
+                className="rounded-full bg-primary px-6 py-3 text-center font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim"
+                href={invoiceHref}
+              >
+                Lanjutkan
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
