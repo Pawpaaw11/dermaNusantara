@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, ChevronDown, UserRound } from "lucide-react";
+import { ArrowLeft, UserRound } from "lucide-react";
 import { DonationPaymentForm } from "@/components/DonationPaymentForm";
 import { Footer } from "@/components/Footer";
 import { SiteHeader } from "@/components/SiteHeader";
-import { getProgramBySlug, programs } from "@/data/landing-page";
+import { getCampaignBySlug } from "@/lib/api/campaigns";
 
 type DonationPageProps = {
   params: Promise<{
@@ -14,17 +14,15 @@ type DonationPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return programs.map((program) => ({
-    slug: program.slug,
-  }));
-}
+export const dynamic = "force-dynamic";
+
+const currencyFormatter = new Intl.NumberFormat("id-ID");
 
 export async function generateMetadata({
   params,
 }: DonationPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const program = getProgramBySlug(slug);
+  const program = await getCampaignBySlug(slug);
 
   if (!program) {
     return {
@@ -40,7 +38,7 @@ export async function generateMetadata({
 
 export default async function DonationPage({ params }: DonationPageProps) {
   const { slug } = await params;
-  const program = getProgramBySlug(slug);
+  const program = await getCampaignBySlug(slug);
 
   if (!program) {
     notFound();
@@ -62,7 +60,7 @@ export default async function DonationPage({ params }: DonationPageProps) {
                   Kembali ke program
                 </Link>
                 <span>/</span>
-                <span className="text-primary">{program.category}</span>
+                <span className="text-primary">{program.category.name}</span>
               </div>
 
               <div className="mt-6 max-w-3xl">
@@ -73,12 +71,12 @@ export default async function DonationPage({ params }: DonationPageProps) {
 
               <div className="ambient-shadow relative mt-8 aspect-[16/10] overflow-hidden rounded-lg bg-surface">
                 <Image
-                  alt={program.image.alt}
+                  alt={program.coverImageAlt}
                   className="object-cover"
                   fill
                   priority
                   sizes="(min-width: 1024px) 58vw, 100vw"
-                  src={program.image.src}
+                  src={program.coverImageUrl}
                 />
               </div>
 
@@ -94,20 +92,20 @@ export default async function DonationPage({ params }: DonationPageProps) {
                 </div>
               </section>
 
-              <section className="mt-8">
+              {/* <section className="mt-8">
                 <h2 className="font-headline-sm text-headline-sm text-primary">
                   Berita Program
                 </h2>
 
                 <div className="mt-5 space-y-4">
-                  {program.recentUpdates.map((update) => (
+                  {program.updates.map((update) => (
                     <article
                       className="ambient-shadow rounded-lg border border-outline-variant/40 bg-surface p-6"
-                      key={`${update.date}-${update.title}`}
+                      key={`${update.publishedAt}-${update.title}`}
                     >
                       <div className="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
                         <CalendarDays size={16} />
-                        <span>{update.date}</span>
+                        <span>{update.publishedAt}</span>
                       </div>
 
                       <h3 className="mt-3 font-headline-sm text-headline-sm text-primary">
@@ -134,7 +132,7 @@ export default async function DonationPage({ params }: DonationPageProps) {
                     </article>
                   ))}
                 </div>
-              </section>
+              </section> */}
 
               <section className="mt-8">
                 <h2 className="font-headline-sm text-headline-sm text-primary">
@@ -145,18 +143,18 @@ export default async function DonationPage({ params }: DonationPageProps) {
                   {program.recentDonors.map((donor) => (
                     <div
                       className="flex items-center justify-between gap-4 border-b border-outline-variant/30 px-6 py-5 last:border-b-0"
-                      key={`${donor.name}-${donor.amount}`}
+                      key={`${donor.donorDisplayName}-${donor.donatedAt}`}
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-secondary">
                           <UserRound size={20} />
                         </div>
                         <p className="truncate font-label-md text-label-md text-on-background">
-                          {donor.name}
+                          {donor.donorDisplayName}
                         </p>
                       </div>
                       <p className="shrink-0 font-label-md text-label-md text-primary">
-                        {donor.amount}
+                        Rp {currencyFormatter.format(donor.amount)}
                       </p>
                     </div>
                   ))}

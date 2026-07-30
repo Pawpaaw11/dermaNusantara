@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Banknote,
   CheckCircle2,
@@ -9,29 +9,14 @@ import {
   Minus,
   Plus,
   ShieldCheck,
-  Wallet,
   X,
 } from "lucide-react";
-import type { Program } from "@/data/landing-page";
+import type { CampaignDetail } from "@/lib/api/campaigns";
+import { createDonation } from "@/lib/api/donations";
 
 type DonationPaymentFormProps = {
-  program: Program;
+  program: CampaignDetail;
 };
-
-const paymentMethods = [
-  {
-    id: "qris",
-    icon: Wallet,
-    label: "QRIS",
-    description: "Semua e-wallet dan mobile banking",
-  },
-  {
-    id: "bank-transfer",
-    icon: Landmark,
-    label: "Transfer Bank",
-    description: "BCA, Mandiri, BNI, dan bank lainnya",
-  },
-];
 
 const currencyFormatter = new Intl.NumberFormat("id-ID");
 
@@ -47,25 +32,66 @@ function parseCurrencyInput(value: string) {
 export function DonationPaymentForm({
   program,
 }: DonationPaymentFormProps) {
-  const isQuantityMode = program.donationMode === "quantity";
-  const quantityUnitPrice = program.quantityUnitPrice ?? program.minimumDonation;
-  const defaultQuantity = program.quantityDefault ?? 1;
+  const router = useRouter();
+  const donationConfig = program.donationConfig;
+  const isQuantityMode = donationConfig.inputType === "QUANTITY";
+  const quantityUnitPrice =
+    donationConfig.inputType === "QUANTITY"
+      ? donationConfig.unitPrice
+      : donationConfig.minimumAmount;
+  const defaultQuantity =
+    donationConfig.inputType === "QUANTITY"
+      ? donationConfig.minimumQuantity
+      : 1;
+  const quantityStep =
+    donationConfig.inputType === "QUANTITY"
+      ? donationConfig.quantityStep
+      : 1;
+  const maximumQuantity =
+    donationConfig.inputType === "QUANTITY"
+      ? donationConfig.maximumQuantity
+      : null;
+  const minimumDonation =
+    donationConfig.inputType === "QUANTITY"
+      ? quantityUnitPrice * defaultQuantity
+      : donationConfig.minimumAmount;
+  const amountOptions =
+    donationConfig.inputType === "MONEY"
+      ? donationConfig.presetAmounts
+      : [];
+  const quantityLabel =
+    donationConfig.inputType === "QUANTITY"
+      ? donationConfig.unitLabel
+      : "unit";
+  const paymentMethods = program.paymentMethods.map((method) => ({
+    id: method.code,
+    icon: Landmark,
+    label: method.name,
+    description:
+      method.type === "MANUAL_TRANSFER"
+        ? "Transfer ke rekening resmi Derma Nusantara"
+        : "Payment gateway",
+  }));
   const initialAmount =
     isQuantityMode
       ? quantityUnitPrice * defaultQuantity
-      : (program.amountOptions[1] ??
-          program.amountOptions[0] ??
-          program.minimumDonation);
+      : (amountOptions[1] ?? amountOptions[0] ?? minimumDonation);
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(
     initialAmount,
   );
   const [customAmount, setCustomAmount] = useState("");
   const [quantity, setQuantity] = useState(defaultQuantity);
-  const [selectedMethod, setSelectedMethod] = useState(paymentMethods[0].id);
+  const [selectedMethod, setSelectedMethod] = useState(
+    paymentMethods[0]?.id ?? "",
+  );
   const [donorName, setDonorName] = useState("");
+  const [donorWhatsapp, setDonorWhatsapp] = useState("");
+  const [donorMessage, setDonorMessage] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const donationAmount = useMemo(() => {
     if (isQuantityMode) {
@@ -80,27 +106,64 @@ export function DonationPaymentForm({
   }, [customAmount, isQuantityMode, quantity, quantityUnitPrice, selectedAmount]);
 
   const isAmountValid = isQuantityMode
-    ? quantity >= 1
-    : donationAmount >= program.minimumDonation;
+    ? quantity >= defaultQuantity &&
+      (maximumQuantity === null || quantity <= maximumQuantity) &&
+      (quantity - defaultQuantity) % quantityStep === 0
+    : donationAmount >= minimumDonation;
   const selectedMethodLabel =
     paymentMethods.find((method) => method.id === selectedMethod)?.label ??
-    paymentMethods[0].label;
+    paymentMethods[0]?.label ??
+    "Tidak tersedia";
+  const targetLabel =
+    program.target === null
+      ? "-"
+      : program.target.metric === "AMOUNT"
+        ? formatCurrency(program.target.value)
+        : `${currencyFormatter.format(program.target.value)} ${quantityLabel}`;
   const displayDonorName =
     anonymous || donorName.trim().length === 0
       ? "Hamba Allah"
       : donorName.trim();
-  const invoiceSearchParams = new URLSearchParams({
-    amount: String(donationAmount),
-    donor: displayDonorName,
-    method: selectedMethod,
-    program: program.slug,
-  });
+  const isDonorValid = anonymous || donorName.trim().length > 0;
+  const isWhatsappValid = /^[+\d][\d\s-]{7,19}$/.test(donorWhatsapp.trim());
+  const canSubmit =
+    isAmountValid &&
+    isDonorValid &&
+    isWhatsappValid &&
+    selectedMethod.length > 0 &&
+    !isSubmitting;
 
-  if (isQuantityMode) {
-    invoiceSearchParams.set("quantity", String(quantity));
+  async function handleCreateDonation() {
+    if (!canSubmit) {
+      setSubmitError("Lengkapi nama dan nomor WhatsApp yang valid.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    const result = await createDonation({
+      campaignId: program.id,
+      contribution: isQuantityMode
+        ? { quantity }
+        : { amount: donationAmount },
+      donor: {
+        name: anonymous ? "Hamba Allah" : donorName.trim(),
+        whatsapp: donorWhatsapp.trim(),
+        isAnonymous: anonymous,
+        message: donorMessage.trim() || undefined,
+      },
+      paymentMethodCode: selectedMethod,
+    });
+
+    if (!result.ok) {
+      setSubmitError(result.message);
+      setIsSubmitting(false);
+      return;
+    }
+
+    router.push(`/invoice/${encodeURIComponent(result.publicId)}`);
   }
-
-  const invoiceHref = `/invoice?${invoiceSearchParams.toString()}`;
 
   return (
     <div className="lg:sticky lg:top-28">
@@ -112,27 +175,36 @@ export function DonationPaymentForm({
                 Donasi terkumpul
               </p>
               <p className="mt-2 font-headline-md text-headline-md">
-                {program.collected}
+                {formatCurrency(program.progress.collectedAmount)}
               </p>
             </div>
             <div className="rounded-full bg-white/10 px-4 py-2 text-right">
               <p className="font-label-sm text-label-sm text-primary-fixed-dim">
                 Target
               </p>
-              <p className="mt-1 font-label-md text-label-md">{program.target}</p>
+              <p className="mt-1 font-label-md text-label-md">{targetLabel}</p>
             </div>
           </div>
 
           <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/15">
             <div
               className="h-full rounded-full bg-tertiary"
-              style={{ width: `${program.progress}%` }}
+              style={{
+                width: `${Math.min(program.progress.percentage, 100)}%`,
+              }}
             />
           </div>
 
           <div className="mt-3 flex items-center justify-between font-label-sm text-label-sm text-primary-fixed-dim">
-            <span>{program.donorsLabel}</span>
-            <span>{program.daysLeftLabel}</span>
+            <span>
+              {currencyFormatter.format(program.progress.paidDonationCount)}{" "}
+              donatur
+            </span>
+            <span>
+              {program.daysRemaining === null
+                ? "Tanpa batas waktu"
+                : `${program.daysRemaining} hari lagi`}
+            </span>
           </div>
         </div>
 
@@ -140,6 +212,11 @@ export function DonationPaymentForm({
           className="flex flex-col gap-7 px-8 py-8"
           onSubmit={(event) => {
             event.preventDefault();
+            setSubmitError(null);
+            if (!isDonorValid || !isWhatsappValid) {
+              setSubmitError("Lengkapi nama dan nomor WhatsApp yang valid.");
+              return;
+            }
             setShowSummary(true);
           }}
         >
@@ -162,12 +239,15 @@ export function DonationPaymentForm({
 
                   <div className="flex shrink-0 items-center gap-3">
                     <button
-                      aria-label={`Kurangi ${program.quantityLabel?.toLowerCase()}`}
+                        aria-label={`Kurangi ${quantityLabel.toLowerCase()}`}
                       className="flex size-9 items-center justify-center rounded-full border border-outline-variant bg-surface-container text-primary transition-colors hover:border-primary hover:bg-primary-fixed/30 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={quantity <= 1}
+                      disabled={quantity <= defaultQuantity}
                       onClick={() =>
                         setQuantity((currentQuantity) =>
-                          Math.max(1, currentQuantity - 1),
+                          Math.max(
+                            defaultQuantity,
+                            currentQuantity - quantityStep,
+                          ),
                         )
                       }
                       type="button"
@@ -177,15 +257,22 @@ export function DonationPaymentForm({
 
                     <div className="min-w-[88px] text-center">
                       <p className="font-label-md text-label-md text-primary">
-                        {quantity} Quran
+                        {quantity} {quantityLabel}
                       </p>
                     </div>
 
                     <button
-                      aria-label={`Tambah ${program.quantityLabel?.toLowerCase()}`}
+                      aria-label={`Tambah ${quantityLabel.toLowerCase()}`}
                       className="flex size-9 items-center justify-center rounded-full border border-outline-variant bg-surface-container text-primary transition-colors hover:border-primary hover:bg-primary-fixed/30"
+                      disabled={
+                        maximumQuantity !== null &&
+                        quantity + quantityStep > maximumQuantity
+                      }
                       onClick={() =>
-                        setQuantity((currentQuantity) => currentQuantity + 1)
+                        setQuantity(
+                          (currentQuantity) =>
+                            currentQuantity + quantityStep,
+                        )
                       }
                       type="button"
                     >
@@ -197,7 +284,7 @@ export function DonationPaymentForm({
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-3">
-                  {program.amountOptions.map((amount) => {
+                  {amountOptions.map((amount) => {
                     const isActive = selectedAmount === amount;
 
                     return (
@@ -245,7 +332,7 @@ export function DonationPaymentForm({
                 </label>
 
                 <p className="mt-2 font-label-sm text-label-sm text-on-surface-variant">
-                  Minimal donasi {formatCurrency(program.minimumDonation)}
+                  Minimal donasi {formatCurrency(minimumDonation)}
                 </p>
               </>
             )}
@@ -260,6 +347,7 @@ export function DonationPaymentForm({
               className="w-full rounded-2xl border border-outline-variant bg-surface px-4 py-3 font-body-md text-body-md text-on-background outline-none transition-colors placeholder:text-outline focus:border-secondary"
               onChange={(event) => setDonorName(event.target.value)}
               placeholder="Nama lengkap"
+              required={!anonymous}
               type="text"
               value={donorName}
             />
@@ -278,13 +366,18 @@ export function DonationPaymentForm({
 
             <input
               className="w-full rounded-2xl border border-outline-variant bg-surface px-4 py-3 font-body-md text-body-md text-on-background outline-none transition-colors placeholder:text-outline focus:border-secondary"
+              onChange={(event) => setDonorWhatsapp(event.target.value)}
               placeholder="Nomor WhatsApp"
+              required
               type="tel"
+              value={donorWhatsapp}
             />
 
             <textarea
               className="min-h-[112px] w-full rounded-2xl border border-outline-variant bg-surface px-4 py-3 font-body-md text-body-md text-on-background outline-none transition-colors placeholder:text-outline focus:border-secondary"
+              onChange={(event) => setDonorMessage(event.target.value)}
               placeholder="Doa atau pesan dukungan"
+              value={donorMessage}
             />
           </div>
 
@@ -332,7 +425,7 @@ export function DonationPaymentForm({
 
           <button
             className="hover-lift flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:bg-outline disabled:hover:transform-none"
-            disabled={!isAmountValid}
+            disabled={!isAmountValid || isSubmitting}
             type="submit"
           >
             <Banknote size={18} />
@@ -342,6 +435,11 @@ export function DonationPaymentForm({
           {!isAmountValid ? (
             <p className="text-center font-label-sm text-label-sm text-error">
               Nominal belum memenuhi batas minimal donasi.
+            </p>
+          ) : null}
+          {submitError ? (
+            <p className="text-center font-label-sm text-label-sm text-error" role="alert">
+              {submitError}
             </p>
           ) : null}
         </form>
@@ -387,7 +485,7 @@ export function DonationPaymentForm({
               </p>
               {isQuantityMode ? (
                 <p>
-                  {program.quantityLabel}: {quantity} Quran
+                  {quantityLabel}: {quantity} {quantityLabel}
                 </p>
               ) : null}
               <p>Metode: {selectedMethodLabel}</p>
@@ -402,13 +500,20 @@ export function DonationPaymentForm({
               >
                 Periksa Lagi
               </button>
-              <Link
-                className="rounded-full bg-primary px-6 py-3 text-center font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim"
-                href={invoiceHref}
+              <button
+                className="rounded-full bg-primary px-6 py-3 text-center font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim disabled:cursor-wait disabled:bg-outline"
+                disabled={isSubmitting}
+                onClick={handleCreateDonation}
+                type="button"
               >
-                Lanjutkan
-              </Link>
+                {isSubmitting ? "Membuat invoice..." : "Lanjutkan"}
+              </button>
             </div>
+            {submitError ? (
+              <p className="bg-surface-container px-6 pb-5 text-center font-label-sm text-label-sm text-error" role="alert">
+                {submitError}
+              </p>
+            ) : null}
           </div>
         </div>
       ) : null}
