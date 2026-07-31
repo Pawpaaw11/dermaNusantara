@@ -13,6 +13,7 @@ import type {
   PaymentMethodMaster,
   Article,
   ArticleCategory,
+  HeroSlide,
 } from "./types";
 
 export function resourceApi<T>(resource: string) {
@@ -149,6 +150,15 @@ export const articleCategoriesApi = {
   toggle: (id: string, active: boolean) => adminRequest<ArticleCategory>(`article-categories/${id}/${active ? "activate" : "deactivate"}`, { method: "PATCH", body: "{}" }),
   remove: (id: string) => adminRequest<{ success: boolean }>(`article-categories/${id}`, { method: "DELETE" }),
 };
+export const heroSlidesApi = {
+  list: () => adminRequest<HeroSlide[]>("hero-slides"),
+  create: (input: unknown) => adminRequest<HeroSlide>("hero-slides", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, input: unknown) => adminRequest<HeroSlide>(`hero-slides/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  reorder: (ids: string[]) => adminRequest<HeroSlide[]>("hero-slides/reorder", { method: "PUT", body: JSON.stringify({ ids }) }),
+  toggle: (id: string, active: boolean) => adminRequest<HeroSlide>(`hero-slides/${id}/${active ? "activate" : "deactivate"}`, { method: "PATCH", body: "{}" }),
+  remove: (id: string) => adminRequest<{ success: boolean }>(`hero-slides/${id}`, { method: "DELETE" }),
+};
+
 export const settingsApi = {
   get: () => adminRequest<Record<string, unknown>>("settings"),
   update: (values: Record<string, unknown>) =>

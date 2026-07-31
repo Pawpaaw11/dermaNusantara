@@ -25,6 +25,7 @@ import {
   DonationOptionsEditor,
   PaymentMethodsEditor,
 } from "./CampaignEditors";
+import { ImageUploadField } from "./ImageUploadField";
 
 const emptyForm = {
   categoryId: "",
@@ -285,7 +286,7 @@ export function CampaignEditorPage({ id }: { id?: string }) {
               <Field label="Lokasi" value={form.location} onChange={(location) => setForm({ ...form, location })} />
               <Field className="md:col-span-2" label="Deskripsi singkat" required value={form.shortDescription} onChange={(shortDescription) => setForm({ ...form, shortDescription })} />
               <TextArea className="md:col-span-2" label="Deskripsi lengkap" required value={form.description} onChange={(description) => setForm({ ...form, description })} />
-              <CoverImageField
+              <ImageUploadField title="Gambar sampul" pickerLabel="Pilih gambar program" previewLabel="Preview sampul"
                 className="md:col-span-2"
                 alt={form.coverImageAlt}
                 url={form.coverImageUrl}

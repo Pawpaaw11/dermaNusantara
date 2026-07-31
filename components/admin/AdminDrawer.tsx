@@ -52,6 +52,7 @@ const groups: Array<{ label: string; items: Item[] }> = [
     items: [
       { label: "Artikel", href: "/admin/konten/artikel", icon: Newspaper, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
       { label: "Kategori Artikel", href: "/admin/konten/kategori-artikel", icon: Tags, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
+      { label: "Hero Slider", href: "/admin/konten/slider", icon: ImageIcon, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
     ],
   },
   {

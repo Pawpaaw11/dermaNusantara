@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { Quote } from "lucide-react";
+import { CircleUserRound, Quote } from "lucide-react";
 import { testimonials } from "@/data/landing-page";
 
 export function TestimonialsSection() {
@@ -16,8 +15,8 @@ export function TestimonialsSection() {
             </h2>
           </div>
           <p className="max-w-2xl font-body-lg text-[1rem] leading-7 text-on-surface-variant md:justify-self-end md:text-body-lg">
-            Kepercayaan lahir dari pengalaman nyata para tokoh, relawan, dan
-            sahabat yang melihat langsung bagaimana amanah dikelola.
+            Kesan awal para donatur saat mencoba layanan Derma Nusantara pada
+            hari peluncurannya.
           </p>
         </div>
 
@@ -31,14 +30,8 @@ export function TestimonialsSection() {
 
               <div className="flex flex-1 flex-col p-5 md:p-7">
                 <div className="mb-5 flex items-center justify-between gap-4 md:mb-7">
-                  <div className="relative size-12 overflow-hidden rounded-full border-[3px] border-secondary/35 bg-surface-container-low md:size-16 md:border-4">
-                    <Image
-                      alt={testimonial.image.alt}
-                      className="object-cover"
-                      fill
-                      sizes="(min-width: 768px) 64px, 48px"
-                      src={testimonial.image.src}
-                    />
+                  <div aria-hidden className="flex size-12 items-center justify-center rounded-full border-[3px] border-slate-300 bg-slate-100 text-slate-400 md:size-16 md:border-4">
+                    <CircleUserRound className="size-8 md:size-11" strokeWidth={1.6} />
                   </div>
                   <div className="flex size-9 items-center justify-center rounded-full bg-tertiary-container text-on-tertiary-container md:size-12">
                     <Quote aria-hidden size={18} fill="currentColor" />

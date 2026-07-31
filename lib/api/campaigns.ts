@@ -134,6 +134,19 @@ export async function getCampaigns(): Promise<CampaignListResponse> {
   };
 }
 
+export async function getCampaignsForSitemap(): Promise<CampaignListItem[]> {
+  const first = await fetch(`${apiBaseUrl}/campaigns?page=1&limit=100`, { cache: "no-store" });
+  if (!first.ok) return [];
+  const payload = (await first.json()) as CampaignListResponse;
+  const campaigns = [...payload.data];
+  for (let page = 2; page <= payload.meta.totalPages; page += 1) {
+    const response = await fetch(`${apiBaseUrl}/campaigns?page=${page}&limit=100`, { cache: "no-store" });
+    if (!response.ok) break;
+    campaigns.push(...((await response.json()) as CampaignListResponse).data);
+  }
+  return campaigns;
+}
+
 export const getCampaignBySlug = cache(
   async (slug: string): Promise<CampaignDetail | null> => {
     const response = await fetch(

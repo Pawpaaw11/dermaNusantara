@@ -97,9 +97,9 @@ export function AdminPageSkeleton() {
   return <div className="animate-pulse space-y-6 motion-reduce:animate-none" role="status"><span className="sr-only">Memuat halaman admin</span><div className="h-14 w-72 rounded-xl bg-surface-container-high" /><div className="grid gap-4 md:grid-cols-4">{[1,2,3,4].map((x)=><div className="h-32 rounded-2xl bg-white" key={x} />)}</div><div className="h-96 rounded-2xl bg-white" /></div>;
 }
 
-export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
-  const message = error instanceof Error ? error.message : "Terjadi kesalahan saat memuat data.";
-  return <ErrorBlock message={message} retry={onRetry} />;
+export function ErrorState({ error, message, onRetry }: { error?: unknown; message?: string; onRetry?: () => void }) {
+  const resolvedMessage = message ?? (error instanceof Error ? error.message : "Terjadi kesalahan saat memuat data.");
+  return <ErrorBlock message={resolvedMessage} retry={onRetry} />;
 }
 
 export function EmptyState({ title, description }: { title: string; description: string }) {

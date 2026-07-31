@@ -7,6 +7,7 @@ import { DonationPaymentForm } from "@/components/DonationPaymentForm";
 import { Footer } from "@/components/Footer";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getCampaignBySlug } from "@/lib/api/campaigns";
+import { absoluteUrl, safeJsonLd } from "@/lib/seo";
 
 type DonationPageProps = {
   params: Promise<{
@@ -27,12 +28,16 @@ export async function generateMetadata({
   if (!program) {
     return {
       title: "Program Tidak Ditemukan | Derma Nusantara",
+      robots: { index: false, follow: false },
     };
   }
 
   return {
-    title: `${program.title} | Donasi | Derma Nusantara`,
-    description: program.description,
+    title: `${program.title} | Donasi`,
+    description: program.shortDescription,
+    alternates: { canonical: `/donasi/${program.slug}` },
+    openGraph: { type: "website", url: `/donasi/${program.slug}`, title: `${program.title} | Donasi Derma Nusantara`, description: program.shortDescription, images: [{ url: program.coverImageUrl, alt: program.coverImageAlt }] },
+    twitter: { card: "summary_large_image", title: `${program.title} | Donasi Derma Nusantara`, description: program.shortDescription, images: [program.coverImageUrl] },
   };
 }
 
@@ -43,6 +48,9 @@ export default async function DonationPage({ params }: DonationPageProps) {
   if (!program) {
     notFound();
   }
+
+  const canonicalUrl = absoluteUrl(`/donasi/${program.slug}`);
+  const jsonLd = { "@context": "https://schema.org", "@type": "Project", name: program.title, description: program.shortDescription, url: canonicalUrl, image: absoluteUrl(program.coverImageUrl), category: program.category.name, ...(program.location ? { location: { "@type": "Place", name: program.location } } : {}), potentialAction: { "@type": "DonateAction", target: canonicalUrl, recipient: { "@type": "Organization", name: "Derma Nusantara", url: absoluteUrl("/") } } };
 
   return (
     <>
@@ -170,6 +178,7 @@ export default async function DonationPage({ params }: DonationPageProps) {
         </section>
       </main>
       <Footer />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
     </>
   );
 }

@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { articleCategoriesApi, articlesApi } from "@/lib/admin-api/resources";
 import type { Article, ArticleBlock } from "@/lib/admin-api/types";
 import { DataTable, EmptyState, ErrorState, PageHeader, StatusBadge } from "./AdminUI";
-import { CoverImageField } from "./CampaignPages";
+import { ImageUploadField as CoverImageField } from "./ImageUploadField";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const field = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-secondary";

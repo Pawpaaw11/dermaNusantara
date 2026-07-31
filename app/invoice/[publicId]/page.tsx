@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Invoice Donasi | Derma Nusantara",
   description: "Detail invoice dan instruksi pembayaran donasi.",
+  robots: { index: false, follow: false },
 };
 
 const currencyFormatter = new Intl.NumberFormat("id-ID");

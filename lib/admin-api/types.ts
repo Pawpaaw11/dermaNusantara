@@ -23,6 +23,12 @@ export type Article = {
   createdAt: string; updatedAt: string; category: ArticleCategory;
 };
 
+export type HeroSlide = {
+  id: string; desktopImageUrl: string; desktopImageAlt: string;
+  mobileImageUrl?: string | null; mobileImageAlt?: string | null; linkUrl?: string | null;
+  isActive: boolean; sortOrder: number; createdAt: string; updatedAt: string;
+};
+
 export type AdminProfile = {
   id: string;
   email: string;

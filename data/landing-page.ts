@@ -378,33 +378,21 @@ export const footerLinks = [
 
 export const testimonials = [
   {
-    name: "Dr. Yunus Husain",
-    role: "Mantan Ketua PPATK",
+    name: "M. Fawwaz",
+    role: "Donatur",
     quote:
-      "Derma Nusantara adalah lembaga sosial yang saya nilai bagus dan profesional dalam mengelola dana wakaf. Saya mengajak anda untuk berwakaf melalui Derma Nusantara...",
-    image: {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDEB3CF2jhUfqfdwugvMB_IeGEa2r-OJ6g0I-SyYjiK8-KMlsbJT_muc-oRYrgY2SzHXv5R9qWOU7qLk0hnnOFg-OaFvG33CeQt19Dz0DzvE414A-FNjeL5-7K7YPmNEI4MgERkOgxasIob2WpfmDQQS1k5iaVvXjJ5ZTCBcxSOItsr575-2SV4GJJpGCP-vY-gWAHXksLw1xUhIa-jBpZWvVRFa-DEZ9ajR3VHZjgr-q4NyKl-TwQFqRawyhLeVBGrcwn7M0Jc_37Q",
-      alt: "Potret Dr. Yunus Husain.",
-    },
+      "Tampilan websitenya mudah dipahami. Sejak pertama kali membuka, saya bisa melihat pilihan program dan informasi donasi dengan jelas.",
   },
   {
-    name: "Jamil Azzaini",
-    role: "Inspirator Sukses Mulia",
+    name: "Ayu Daffa",
+    role: "Donatur",
     quote:
-      "Mencerdaskan orang lain yang bersumber dari Kitab yang pasti kebenarannya adalah tindakan cerdas. Pastikan anda turut mencerdaskan anak negeri melalui Derma Nusantara...",
-    image: {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDIWLYuzblYhtUFYxbi0jXfBZcY8HD_cnynNjylCykCaK_jh7AAztWwKyz0LVc2aFUyPB_EKUQmaAAYepSCX1l5lLBlBTMg45SU-6lwSWqX_d0XPMgTrHLUWG6vKdGnTziBkEO2ha6iR4YjZTF4LtpjJltvah9GGMlcdAJTCi0a6Y0Ee9s5kGiXrog2Y6Vn85I0Xtta3oZo3VnO-EDLX8tMwWmCks9Pw2jdTGrMlt6Xm7oLXNlwqaR7Ad9GSQJffYDUCoMlb3DewnbP",
-      alt: "Potret Jamil Azzaini.",
-    },
+      "Proses memilih program hingga mendapatkan informasi pembayaran terasa sederhana. Semoga Derma Nusantara terus menjaga keterbukaan informasinya.",
   },
   {
-    name: "Prabukusumo",
-    role: "GBPH",
+    name: "M. Faaiz",
+    role: "Donatur",
     quote:
-      "Saya mengenal Derma Nusantara sudah hampir 10 tahun, dan terus saya gandoli untuk memberikan bantuan di wilayah Daerah Istimewa Yogyakarta...",
-    image: {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDHUYaKhyfv5CLMGk6r8P-RPxCDZTZSrAiPW9j0hLf9ZEX1hfPTF5T-f-l1VTJ8QL75Ep1qQLqntQaXSyqLLtQVBTIGnDguNYLw7nsNZ6Lfx7NpG1wF52cIcJbAA9IfYol8jRYjH1n8vImVee0ZPSdbSySiamzLR56H2cDc1aiR6_3xEnBZAMn1s8qSFjQ7XuQpJGfU4MH3JmbLLUuwTHz_P-A6BzQ28ZsizwW-UDTXsvH-buZZ2Eah495VL7CGL5VrSAAJOkMrKCR-",
-      alt: "Potret Prabukusumo.",
-    },
+      "Peluncuran website ini membuat akses ke program kebaikan terasa lebih praktis. Saya berharap kabar kegiatan dan penyalurannya dapat diperbarui secara rutin.",
   },
 ];

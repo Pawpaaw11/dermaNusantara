@@ -8,8 +8,10 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { TransparencySection } from "@/components/TransparencySection";
 import { WaveDivider } from "@/components/WaveDivider";
+import { absoluteUrl, safeJsonLd, SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
 export default function Home() {
+  const jsonLd = { "@context": "https://schema.org", "@graph": [{ "@type": "Organization", "@id": `${absoluteUrl("/")}#organization`, name: SITE_NAME, url: absoluteUrl("/"), logo: { "@type": "ImageObject", url: absoluteUrl("/icon-512.png") }, description: SITE_DESCRIPTION }, { "@type": "WebSite", "@id": `${absoluteUrl("/")}#website`, name: SITE_NAME, url: absoluteUrl("/"), description: SITE_DESCRIPTION, publisher: { "@id": `${absoluteUrl("/")}#organization` }, inLanguage: "id-ID" }] };
   return (
     <>
       <SiteHeader />
@@ -25,6 +27,7 @@ export default function Home() {
         <TransparencySection />
       </main>
       <Footer />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
     </>
   );
 }
