@@ -19,6 +19,7 @@ import {
   RotateCcw,
   Search,
   ShieldCheck,
+  Trash2,
   UserRound,
   WalletCards,
 } from "lucide-react";
@@ -30,13 +31,18 @@ import { donationsApi, paymentsApi } from "@/lib/admin-api/resources";
 import { Donation, Payment } from "@/lib/admin-api/types";
 
 import { ConfirmActionDialog, DataTable, ErrorState, PageHeader, StatusBadge } from "./AdminUI";
+import { useAdminSession } from "./AdminSession";
 
 const rupiah = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
 
 export function DonationListPage({ initialStatus }: { initialStatus?: string }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { admin } = useAdminSession();
   const params = useSearchParams();
   const [search, setSearch] = useState(params.get("search") ?? "");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<{ ids: string[]; label: string }>();
   const status = params.get("status") ?? (initialStatus === "verification" ? "" : initialStatus) ?? "";
   const page = Number(params.get("page") ?? 1);
 
@@ -54,23 +60,46 @@ export function DonationListPage({ initialStatus }: { initialStatus?: string }) 
   });
 
   const setParams = (values: Record<string, string>) => {
+    setSelected([]);
     const next = new URLSearchParams(params);
     Object.entries(values).forEach(([key, value]) => value ? next.set(key, value) : next.delete(key));
     next.set("page", "1");
     router.replace(`?${next.toString()}`);
   };
 
+  const donations = useMemo(() => query.data?.data ?? [], [query.data?.data]);
+  const canDelete = admin.role === "SUPER_ADMIN";
+  const allSelected = Boolean(donations.length) && donations.every((donation) => selected.includes(donation.id));
+  const remove = useMutation({
+    mutationFn: (ids: string[]) => donationsApi.bulkDelete(ids),
+    onSuccess: async () => {
+      setDeleteTarget(undefined);
+      setSelected([]);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin", "donations"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "payments"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "campaigns"] }),
+      ]);
+    },
+  });
+
   const columns = useMemo<ColumnDef<Donation>[]>(
     () => [
+      ...(canDelete ? [{
+        id: "select",
+        header: () => <input aria-label="Pilih semua donasi pada halaman" className="size-4 accent-primary" type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? [] : donations.map((donation) => donation.id))} />,
+        cell: ({ row }: { row: { original: Donation } }) => <input aria-label={`Pilih ${row.original.publicId}`} className="size-4 accent-primary" type="checkbox" checked={selected.includes(row.original.id)} onChange={() => setSelected((current) => current.includes(row.original.id) ? current.filter((id) => id !== row.original.id) : [...current, row.original.id])} />,
+      } as ColumnDef<Donation>] : []),
       { accessorKey: "publicId", header: "Invoice", cell: ({ row }) => <Link className="font-semibold text-[var(--color-primary)] hover:underline" href={`/admin/operasional/donasi/${row.original.id}`}>{row.original.publicId}</Link> },
       { accessorKey: "donorDisplayName", header: "Donatur" },
       { accessorKey: "campaign.title", header: "Program", cell: ({ row }) => row.original.campaign?.title ?? row.original.campaignTitle ?? "—" },
       { accessorKey: "baseAmount", header: "Donasi", cell: ({ getValue }) => rupiah.format(Number(getValue())) },
       { accessorKey: "status", header: "Status", cell: ({ getValue }) => <StatusBadge status={String(getValue())} /> },
       { accessorKey: "createdAt", header: "Dibuat", cell: ({ getValue }) => new Date(String(getValue())).toLocaleString("id-ID") },
-      { id: "action", header: "", cell: ({ row }) => <Link aria-label="Lihat detail" className="admin-icon-button" href={`/admin/operasional/donasi/${row.original.id}`}><Eye size={16} /></Link> },
+      { id: "action", header: "", cell: ({ row }) => <div className="flex justify-end gap-2"><Link aria-label="Lihat detail" className="admin-icon-button" href={`/admin/operasional/donasi/${row.original.id}`}><Eye size={16} /></Link>{canDelete && <button aria-label="Hapus donasi" className="admin-icon-button text-red-600 hover:bg-red-50" onClick={() => setDeleteTarget({ ids: [row.original.id], label: row.original.publicId })}><Trash2 size={16} /></button>}</div> },
     ],
-    [],
+    [allSelected, canDelete, donations, selected],
   );
 
   return (
@@ -87,7 +116,12 @@ export function DonationListPage({ initialStatus }: { initialStatus?: string }) 
           </select>
         )}
       </div>
-      {query.isError ? <ErrorState error={query.error} onRetry={() => query.refetch()} /> : <DataTable columns={columns} data={query.data?.data ?? []} loading={query.isLoading} />}
+      {canDelete && selected.length > 0 && <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3"><p className="text-sm font-semibold text-red-800">{selected.length} donasi dipilih</p><button className="admin-button admin-button-danger" onClick={() => setDeleteTarget({ ids: selected, label: `${selected.length} donasi terpilih` })}><Trash2 size={16} /> Hapus terpilih</button></div>}
+      {query.isError ? <ErrorState error={query.error} onRetry={() => query.refetch()} /> : <DataTable columns={columns} data={donations} loading={query.isLoading} />}
+      <ConfirmActionDialog open={Boolean(deleteTarget)} title={deleteTarget && deleteTarget.ids.length > 1 ? "Hapus donasi terpilih?" : "Hapus donasi?"} description={`${deleteTarget?.label ?? "Donasi"} akan dihapus permanen beserta payment dan riwayat statusnya.`} confirmLabel={remove.isPending ? "Menghapus…" : "Hapus permanen"} pending={remove.isPending} onClose={() => setDeleteTarget(undefined)} onConfirm={() => deleteTarget && remove.mutate(deleteTarget.ids)}>
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-800">Semua status dapat dihapus. Jika transaksi berstatus PAID, progres dan laporan campaign akan ikut berkurang. Tindakan ini tidak dapat dibatalkan.</div>
+        {remove.isError && <p className="mt-3 text-sm text-red-600">{remove.error.message}</p>}
+      </ConfirmActionDialog>
     </section>
   );
 }

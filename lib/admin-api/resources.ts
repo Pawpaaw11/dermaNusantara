@@ -105,6 +105,11 @@ export const campaignsApi = {
 };
 export const donationsApi = {
   ...resourceApi<Donation>("donations"),
+  bulkDelete: (ids: string[]) =>
+    adminRequest<{ deletedCount: number; ids: string[] }>("donations/bulk", {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+    }),
   transition: (id: string, action: string, input: unknown) =>
     adminRequest<Donation>(`donations/${id}/${action}`, {
       method: "POST",
