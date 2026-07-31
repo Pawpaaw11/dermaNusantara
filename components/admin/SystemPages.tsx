@@ -29,11 +29,11 @@ export function SettingsPage() {
     ["organizationName", "Nama organisasi"],
     ["organizationIdentity", "Identitas organisasi"],
     ["adminWhatsapp", "WhatsApp admin"],
-    ["anonymousDonorLabel", "Label donor anonim"],
-    ["confirmationMessageTemplate", "Template konfirmasi"],
+    ["anonymousLabel", "Label donor anonim"],
+    ["confirmationTemplate", "Template konfirmasi"],
     ["defaultExpiryMinutes", "Default expiry (menit)"],
-    ["uniqueCodeMinimum", "Kode unik minimum"],
-    ["uniqueCodeMaximum", "Kode unik maksimum"],
+    ["uniqueCodeMin", "Kode unik minimum"],
+    ["uniqueCodeMax", "Kode unik maksimum"],
     ["timezone", "Zona waktu"],
   ];
   return (
@@ -41,7 +41,10 @@ export function SettingsPage() {
       <PageHeader title="Pengaturan" description="Konfigurasi operasional yang diizinkan backend melalui schema allowlist." />
       {query.isError ? <ErrorState error={query.error} onRetry={() => query.refetch()} /> : (
         <form className="admin-card space-y-5 p-6" onSubmit={(event) => { event.preventDefault(); setSaved(false); mutation.mutate(); }}>
-          {fields.map(([key, label]) => <label className="admin-field" key={key}><span>{label}</span>{key.includes("Template") || key.includes("template") ? <textarea rows={4} value={String(values[key] ?? "")} onChange={(event) => setValues({ ...values, [key]: event.target.value })} /> : <input value={String(values[key] ?? "")} onChange={(event) => setValues({ ...values, [key]: event.target.value })} />}</label>)}
+          {fields.map(([key, label]) => {
+            const numeric = ["defaultExpiryMinutes", "uniqueCodeMin", "uniqueCodeMax"].includes(key);
+            return <label className="admin-field" key={key}><span>{label}</span>{key.includes("Template") || key.includes("template") ? <textarea rows={6} value={String(values[key] ?? "")} onChange={(event) => setValues({ ...values, [key]: event.target.value })} /> : <input type={numeric ? "number" : "text"} value={String(values[key] ?? "")} onChange={(event) => setValues({ ...values, [key]: numeric ? Number(event.target.value) : event.target.value })} />}</label>;
+          })}
           {mutation.isError && <ErrorState error={mutation.error} />}
           {saved && <p className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">Pengaturan berhasil disimpan.</p>}
           <div className="sticky bottom-4 flex justify-end rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg"><button className="admin-button admin-button-primary" disabled={mutation.isPending}><Save size={16} /> Simpan pengaturan</button></div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { authApi } from "@/lib/admin-api/auth";
 import { AdminApiError } from "@/lib/admin-api/client";
@@ -19,7 +19,6 @@ export function AdminSessionProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
   const query = useQuery({
     queryKey: ["admin", "me"],
@@ -28,11 +27,19 @@ export function AdminSessionProvider({
 
   useEffect(() => {
     if (query.error instanceof AdminApiError && query.error.status === 401) {
-      router.replace(`/admin/login?returnTo=${encodeURIComponent(pathname)}`);
+      window.location.replace(
+        `/admin/login?returnTo=${encodeURIComponent(pathname)}`,
+      );
     }
-  }, [pathname, query.error, router]);
+  }, [pathname, query.error]);
 
   if (query.isPending) {
+    return <AdminShellSkeleton />;
+  }
+  if (
+    query.error instanceof AdminApiError &&
+    query.error.status === 401
+  ) {
     return <AdminShellSkeleton />;
   }
   if (query.isError || !query.data) {
@@ -43,7 +50,9 @@ export function AdminSessionProvider({
             Sesi admin belum dapat dimuat
           </h1>
           <p className="mt-3 text-on-surface-variant">
-            Periksa API lalu coba kembali.
+            {query.error instanceof AdminApiError
+              ? query.error.message
+              : "Periksa API lalu coba kembali."}
           </p>
           <button
             className="mt-6 rounded-full bg-primary px-6 py-3 font-semibold text-white"

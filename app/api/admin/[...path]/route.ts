@@ -61,11 +61,12 @@ async function proxy(
   try {
     let response = await forward(originalCookie);
     let cookiesToForward = getSetCookies(response.headers);
-    const isAuthPath = path[0] === "auth";
+    const isRefreshEndpoint =
+      path[0] === "auth" && ["login", "refresh"].includes(path[1] ?? "");
 
     if (
       response.status === 401 &&
-      !isAuthPath &&
+      !isRefreshEndpoint &&
       request.cookies.has("admin_refresh")
     ) {
       const refresh = await fetch(`${apiBaseUrl}/admin/auth/refresh`, {

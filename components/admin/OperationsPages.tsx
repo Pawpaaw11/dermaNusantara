@@ -2,7 +2,24 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowLeft, CheckCircle2, CircleX, Eye, RotateCcw, Search } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarClock,
+  CheckCircle2,
+  CircleX,
+  Copy,
+  Eye,
+  HeartHandshake,
+  MapPin,
+  MessageSquareText,
+  Phone,
+  ReceiptText,
+  RotateCcw,
+  Search,
+  ShieldCheck,
+  UserRound,
+  WalletCards,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -96,18 +113,155 @@ export function DonationDetailPage({ id }: { id: string }) {
   const donation = query.data?.data;
   if (!donation) return <div className="h-96 animate-pulse rounded-2xl bg-slate-100 motion-reduce:animate-none" />;
   const available = donation.availableActions ?? actionsByStatus[donation.status] ?? [];
+  const payment = donation.payments?.[0] as DonationPayment | undefined;
+  const histories = donation.statusHistories ?? donation.statusHistory ?? [];
+  const donorDisplayName = donation.isAnonymous ? "Hamba Allah" : donation.donorName;
+  const contribution =
+    donation.inputTypeSnapshot === "QUANTITY"
+      ? `${donation.quantity ?? 0} ${donation.unitLabelSnapshot ?? donation.unitNameSnapshot ?? "unit"}`
+      : rupiah.format(Number(donation.baseAmount));
 
   return (
     <section>
-      <PageHeader title={donation.publicId} description="Detail transaksi, snapshot pembayaran, attribution, dan riwayat status." actions={<Link className="admin-button admin-button-secondary" href="/admin/operasional/donasi"><ArrowLeft size={16} /> Kembali</Link>} />
-      <div className="grid gap-5 xl:grid-cols-[1fr_340px]">
-        <div className="space-y-5">
-          <DetailCard title="Informasi Transaksi" data={donation} />
-          {donation.statusHistory && <DetailCard title="Riwayat Status" data={donation.statusHistory} />}
-          {donation.auditLogs && <DetailCard title="Audit Terkait" data={donation.auditLogs} />}
+      <PageHeader
+        title="Detail Donasi"
+        description={`Invoice ${donation.invoiceNumber}`}
+        actions={<Link className="admin-button admin-button-secondary" href="/admin/operasional/donasi"><ArrowLeft size={16} /> Kembali ke daftar</Link>}
+      />
+
+      <div className="admin-card mb-5 overflow-hidden">
+        <div className="bg-gradient-to-r from-primary via-[#24349c] to-[#217da2] p-6 text-white md:p-7">
+          <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+            <div>
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold tracking-wide">
+                  {donation.invoiceNumber}
+                </span>
+                <StatusBadge status={donation.status} />
+              </div>
+              <p className="text-sm text-white/65">Total donasi</p>
+              <p className="mt-1 text-3xl font-extrabold tracking-tight md:text-4xl">
+                {rupiah.format(Number(donation.baseAmount))}
+              </p>
+              {payment && Number(payment.payableAmount) !== Number(donation.baseAmount) && (
+                <p className="mt-2 text-sm text-white/70">
+                  Total transfer {rupiah.format(Number(payment.payableAmount))}, termasuk kode unik {payment.uniqueCode}
+                </p>
+              )}
+            </div>
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:min-w-[430px]">
+              <HeroInfo label="Donatur" value={donorDisplayName} />
+              <HeroInfo label="Program" value={donation.campaignTitleSnapshot} />
+              <HeroInfo label="Dibuat" value={formatDateTime(donation.createdAt)} />
+              <HeroInfo label="Kedaluwarsa" value={formatDateTime(donation.expiresAt)} />
+            </div>
+          </div>
         </div>
-        <aside className="admin-card h-fit p-5">
-          <div className="mb-4 flex items-center justify-between"><h2 className="font-bold">Tindakan</h2><StatusBadge status={donation.status} /></div>
+      </div>
+
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-5">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <SectionCard icon={UserRound} title="Informasi Donatur" description="Identitas yang diberikan saat berdonasi.">
+              <InfoRows rows={[
+                ["Nama", donation.donorName],
+                ["Nama tampil", donorDisplayName],
+                ["WhatsApp", donation.donorWhatsapp],
+                ["Donasi anonim", donation.isAnonymous ? "Ya" : "Tidak"],
+              ]} />
+              {Boolean(donation.publicMessage) && (
+                <div className="mt-4 rounded-xl border border-secondary/20 bg-secondary-container/30 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-primary"><MessageSquareText size={15} /> Pesan donatur</div>
+                  <p className="text-sm leading-6 text-slate-700">{String(donation.publicMessage)}</p>
+                </div>
+              )}
+            </SectionCard>
+
+            <SectionCard icon={HeartHandshake} title="Program & Kontribusi" description="Snapshot program ketika transaksi dibuat.">
+              <InfoRows rows={[
+                ["Program", donation.campaignTitleSnapshot],
+                ["Tipe kontribusi", donation.inputTypeSnapshot],
+                ["Kontribusi", contribution],
+                ["Nominal dasar", rupiah.format(Number(donation.baseAmount))],
+              ]} />
+              <Link className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline" href={`/donasi/${String(donation.campaignSlugSnapshot)}`} target="_blank">
+                Lihat halaman program
+              </Link>
+            </SectionCard>
+          </div>
+
+          <SectionCard icon={WalletCards} title="Informasi Pembayaran" description="Snapshot metode dan rekening tujuan transaksi.">
+            {payment ? (
+              <div className="grid gap-5 lg:grid-cols-[1fr_1.15fr]">
+                <InfoRows rows={[
+                  ["Metode", payment.paymentMethod?.name ?? payment.provider ?? "—"],
+                  ["Status pembayaran", payment.status],
+                  ["Nominal transfer", rupiah.format(Number(payment.payableAmount))],
+                  ["Kode unik", String(payment.uniqueCode ?? 0)],
+                  ["Batas pembayaran", formatDateTime(payment.expiresAt)],
+                  ["Referensi bank", payment.bankReference ?? "—"],
+                ]} />
+                <div className="rounded-2xl bg-primary p-5 text-white">
+                  <p className="text-xs font-bold uppercase tracking-wider text-white/55">Rekening tujuan</p>
+                  <p className="mt-3 text-lg font-bold">{payment.bankNameSnapshot ?? payment.bankAccount?.bankName ?? "Bank"}</p>
+                  <CopyValue label="Nomor rekening" value={payment.accountNumberSnapshot ?? payment.bankAccount?.accountNumber ?? "—"} />
+                  <p className="mt-3 text-xs text-white/55">Atas nama</p>
+                  <p className="font-semibold">{payment.accountHolderSnapshot ?? payment.bankAccount?.accountHolderName ?? "—"}</p>
+                </div>
+              </div>
+            ) : <p className="text-sm text-slate-500">Payment belum tersedia.</p>}
+          </SectionCard>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <SectionCard icon={MapPin} title="Attribution & Perangkat" description="Sumber kunjungan dan metadata teknis.">
+              <InfoRows rows={[
+                ["UTM source", donation.utmSource ?? "Direct"],
+                ["UTM medium", donation.utmMedium ?? "—"],
+                ["UTM campaign", donation.utmCampaign ?? "—"],
+                ["Referrer", donation.referrer ?? "—"],
+                ["Lokasi", [donation.geoCity, donation.geoProvince, donation.geoCountry].filter(Boolean).join(", ") || "—"],
+                ["IP address", donation.ipAddress ?? "—"],
+              ]} />
+            </SectionCard>
+
+            <SectionCard icon={CalendarClock} title="Riwayat Status" description="Timeline perubahan status transaksi.">
+              {histories.length ? (
+                <ol className="space-y-4">
+                  {histories.map((history, index) => (
+                    <li className="relative flex gap-3" key={String(history.id ?? index)}>
+                      <div className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary-container text-primary">
+                        <CheckCircle2 size={15} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">{String(history.toStatus ?? history.status ?? "Status diperbarui").replaceAll("_", " ")}</p>
+                        <p className="text-xs text-slate-500">{history.createdAt ? formatDateTime(String(history.createdAt)) : "—"}</p>
+                        {Boolean(history.reason) && <p className="mt-1 text-sm text-slate-600">{String(history.reason)}</p>}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              ) : <p className="text-sm text-slate-500">Belum ada perubahan status tambahan.</p>}
+            </SectionCard>
+          </div>
+
+          {donation.auditLogs?.length ? (
+            <details className="admin-card group p-5">
+              <summary className="flex cursor-pointer list-none items-center gap-3 font-bold text-slate-900">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-primary"><ShieldCheck size={18} /></span>
+                Audit teknis
+                <span className="ml-auto text-xs font-normal text-slate-500">{donation.auditLogs.length} aktivitas</span>
+              </summary>
+              <pre className="mt-4 max-h-96 overflow-auto rounded-xl bg-slate-950 p-4 text-xs leading-6 text-slate-100">{JSON.stringify(donation.auditLogs, null, 2)}</pre>
+            </details>
+          ) : null}
+        </div>
+
+        <aside className="admin-card sticky top-24 h-fit overflow-hidden">
+          <div className="border-b border-slate-200 p-5">
+            <div className="flex items-center justify-between"><h2 className="font-bold">Tindakan transaksi</h2><StatusBadge status={donation.status} /></div>
+            <p className="mt-2 text-sm leading-5 text-slate-500">Pilih tindakan sesuai hasil pengecekan pembayaran.</p>
+          </div>
+          <div className="space-y-2 p-5">
           <div className="space-y-2">
             {available.map((item) => (
               <button key={item} className={item.includes("reject") || item === "cancel" ? "admin-button admin-button-danger w-full" : "admin-button admin-button-primary w-full"} onClick={() => setAction(item)}>
@@ -115,7 +269,12 @@ export function DonationDetailPage({ id }: { id: string }) {
                 {actionLabels[item] ?? item}
               </button>
             ))}
-            {!available.length && <p className="text-sm text-slate-500">Tidak ada transisi status yang tersedia.</p>}
+            {!available.length && <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700"><CheckCircle2 className="mb-2" size={20} />Transaksi sudah berada pada status final.</div>}
+          </div>
+          </div>
+          <div className="border-t border-slate-200 bg-slate-50 p-5">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-400">Akses cepat</p>
+            <a className="admin-button admin-button-secondary w-full" href={`https://wa.me/${String(donation.donorWhatsapp).replace(/\D/g, "")}`} target="_blank" rel="noreferrer"><Phone size={16} /> Hubungi donatur</a>
           </div>
         </aside>
       </div>
@@ -126,6 +285,37 @@ export function DonationDetailPage({ id }: { id: string }) {
       </ConfirmActionDialog>
     </section>
   );
+}
+
+type DonationPayment = Payment & {
+  provider?: string;
+  bankReference?: string | null;
+  bankAccount?: {
+    bankName?: string;
+    accountNumber?: string;
+    accountHolderName?: string;
+  } | null;
+  accountHolderSnapshot?: string | null;
+};
+
+function HeroInfo({ label, value }: { label: string; value: string }) {
+  return <div className="min-w-0 rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] font-bold uppercase tracking-wide text-white/50">{label}</p><p className="mt-1 truncate text-sm font-semibold">{value}</p></div>;
+}
+
+function SectionCard({ icon: Icon, title, description, children }: { icon: typeof ReceiptText; title: string; description: string; children: React.ReactNode }) {
+  return <section className="admin-card p-5 md:p-6"><div className="mb-5 flex items-start gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-fixed text-primary"><Icon size={19} /></span><div><h2 className="font-bold text-slate-900">{title}</h2><p className="mt-0.5 text-xs leading-5 text-slate-500">{description}</p></div></div>{children}</section>;
+}
+
+function InfoRows({ rows }: { rows: Array<[string, unknown]> }) {
+  return <dl className="divide-y divide-slate-100">{rows.map(([label, value]) => <div className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[145px_1fr]" key={label}><dt className="text-sm text-slate-500">{label}</dt><dd className="break-words text-sm font-semibold text-slate-800">{String(value ?? "—")}</dd></div>)}</dl>;
+}
+
+function CopyValue({ label, value }: { label: string; value: string }) {
+  return <div className="mt-4"><p className="text-xs text-white/55">{label}</p><div className="mt-1 flex items-center justify-between gap-3"><p className="text-xl font-extrabold tracking-wider">{value}</p><button aria-label={`Salin ${label}`} className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20" onClick={() => navigator.clipboard.writeText(value)}><Copy size={16} /></button></div></div>;
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(value));
 }
 
 export function PaymentListPage() {
