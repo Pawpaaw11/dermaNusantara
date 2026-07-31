@@ -11,6 +11,8 @@ import type {
   MediaAsset,
   Payment,
   PaymentMethodMaster,
+  Article,
+  ArticleCategory,
 } from "./types";
 
 export function resourceApi<T>(resource: string) {
@@ -126,6 +128,21 @@ export const mediaApi = {
       body,
     });
   },
+};
+export const articlesApi = {
+  list: (params: ListParams = {}) => adminRequest<Article[]>(`articles${queryString(params)}`),
+  get: (id: string) => adminRequest<Article>(`articles/${id}`),
+  create: (input: unknown) => adminRequest<Article>("articles", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, input: unknown) => adminRequest<Article>(`articles/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  action: (id: string, action: string, input: unknown) => adminRequest<Article>(`articles/${id}/${action}`, { method: "POST", body: JSON.stringify(input) }),
+  remove: (id: string, expectedUpdatedAt: string) => adminRequest<{ success: boolean }>(`articles/${id}`, { method: "DELETE", body: JSON.stringify({ expectedUpdatedAt }) }),
+};
+export const articleCategoriesApi = {
+  list: () => adminRequest<ArticleCategory[]>("article-categories"),
+  create: (input: unknown) => adminRequest<ArticleCategory>("article-categories", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, input: unknown) => adminRequest<ArticleCategory>(`article-categories/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  toggle: (id: string, active: boolean) => adminRequest<ArticleCategory>(`article-categories/${id}/${active ? "activate" : "deactivate"}`, { method: "PATCH", body: "{}" }),
+  remove: (id: string) => adminRequest<{ success: boolean }>(`article-categories/${id}`, { method: "DELETE" }),
 };
 export const settingsApi = {
   get: () => adminRequest<Record<string, unknown>>("settings"),

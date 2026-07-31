@@ -27,6 +27,7 @@ import {
   Tags,
   UserCog,
   Users,
+  Newspaper,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -46,6 +47,13 @@ type Item = {
 };
 
 const groups: Array<{ label: string; items: Item[] }> = [
+  {
+    label: "Konten",
+    items: [
+      { label: "Artikel", href: "/admin/konten/artikel", icon: Newspaper, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
+      { label: "Kategori Artikel", href: "/admin/konten/kategori-artikel", icon: Tags, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
+    ],
+  },
   {
     label: "Utama",
     items: [

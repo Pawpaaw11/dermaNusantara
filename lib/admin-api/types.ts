@@ -1,5 +1,28 @@
 export type AdminRole = "SUPER_ADMIN" | "CAMPAIGN_MANAGER" | "VERIFIER";
 
+export type ArticleBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; text: string; level: 2 | 3 }
+  | { type: "quote"; text: string; attribution?: string }
+  | { type: "image"; url: string; alt: string; caption?: string };
+
+export type ArticleCategory = {
+  id: string; code: string; name: string; isActive: boolean;
+  _count?: { articles: number };
+};
+
+export type Article = {
+  id: string; categoryId: string; slug: string; title: string; excerpt: string;
+  authorName: string; readTimeMinutes: number; coverImageUrl: string;
+  coverImageAlt: string; coverImageCaption?: string | null; content: ArticleBlock[];
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED"; publishedAt?: string | null;
+  disbursedAmount?: number | null; beneficiaryCount?: number | null; beneficiaryUnit?: string | null;
+  ctaTitle?: string | null; ctaDescription?: string | null; ctaStartingAmount?: number | null;
+  ctaVerificationTime?: string | null; ctaButtonLabel?: string | null; ctaUrl?: string | null;
+  seoTitle?: string | null; seoDescription?: string | null; ogImageUrl?: string | null;
+  createdAt: string; updatedAt: string; category: ArticleCategory;
+};
+
 export type AdminProfile = {
   id: string;
   email: string;

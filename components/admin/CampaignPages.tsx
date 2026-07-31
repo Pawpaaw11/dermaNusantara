@@ -347,7 +347,7 @@ export function CampaignEditorPage({ id }: { id?: string }) {
   );
 }
 
-function CoverImageField({
+export function CoverImageField({
   url,
   alt,
   onUrlChange,
