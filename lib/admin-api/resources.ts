@@ -2,11 +2,15 @@ import { adminDownload, adminRequest, queryString } from "./client";
 import type {
   Campaign,
   CampaignCategory,
-  ApiResponse,
+  CampaignDonationConfig,
+  CampaignDonationOption,
+  CampaignStatBaseline,
+  CampaignUpdate,
   Donation,
   ListParams,
   MediaAsset,
   Payment,
+  PaymentMethodMaster,
 } from "./types";
 
 export function resourceApi<T>(resource: string) {
@@ -46,24 +50,56 @@ export const campaignsApi = {
   subList: <T>(id: string, path: string) =>
     adminRequest<T[]>(`campaigns/${id}/${path}`),
   categories: () => adminRequest<CampaignCategory[]>("campaign-categories?page=1&limit=100"),
-  subresource: async (id: string, path: string): Promise<ApiResponse<unknown>> => {
-    const mapped: Record<string, string> = {
-      donation: "donation-config",
-      presets: "donation-options",
-      payments: "payment-methods",
-      updates: "updates",
-      baseline: "stat-baseline",
-    };
-    if (path === "donation" || path === "payments") {
-      const response = await adminRequest<Campaign>(`campaigns/${id}`);
-      return {
-        data: path === "donation"
-          ? response.data.donationConfig
-          : response.data.paymentMethods,
-      };
-    }
-    return adminRequest<unknown>(`campaigns/${id}/${mapped[path] ?? path}`);
-  },
+  saveDonationConfig: (id: string, input: Omit<CampaignDonationConfig, "id" | "campaignId">) =>
+    adminRequest<Campaign>(`campaigns/${id}/donation-config`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    }),
+  donationOptions: (id: string) =>
+    adminRequest<CampaignDonationOption[]>(`campaigns/${id}/donation-options`),
+  createDonationOption: (id: string, input: Omit<CampaignDonationOption, "id" | "campaignId">) =>
+    adminRequest<CampaignDonationOption>(`campaigns/${id}/donation-options`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  updateDonationOption: (id: string, optionId: string, input: Omit<CampaignDonationOption, "id" | "campaignId">) =>
+    adminRequest<CampaignDonationOption>(`campaigns/${id}/donation-options/${optionId}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    }),
+  deleteDonationOption: (id: string, optionId: string) =>
+    adminRequest<{ success: boolean }>(`campaigns/${id}/donation-options/${optionId}`, { method: "DELETE" }),
+  paymentMethodMasters: () =>
+    adminRequest<PaymentMethodMaster[]>("payment-methods?page=1&limit=100"),
+  savePaymentMethods: (id: string, paymentMethodIds: string[]) =>
+    adminRequest<Campaign>(`campaigns/${id}/payment-methods`, {
+      method: "PUT",
+      body: JSON.stringify({ paymentMethodIds }),
+    }),
+  updates: (id: string) => adminRequest<CampaignUpdate[]>(`campaigns/${id}/updates`),
+  createUpdate: (id: string, input: Omit<CampaignUpdate, "id" | "campaignId">) =>
+    adminRequest<CampaignUpdate>(`campaigns/${id}/updates`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  updateUpdate: (id: string, updateId: string, input: Omit<CampaignUpdate, "id" | "campaignId">) =>
+    adminRequest<CampaignUpdate>(`campaigns/${id}/updates/${updateId}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    }),
+  deleteUpdate: (id: string, updateId: string) =>
+    adminRequest<{ success: boolean }>(`campaigns/${id}/updates/${updateId}`, { method: "DELETE" }),
+  reorderUpdates: (id: string, ids: string[]) =>
+    adminRequest<CampaignUpdate[]>(`campaigns/${id}/updates/reorder`, {
+      method: "PUT",
+      body: JSON.stringify({ ids }),
+    }),
+  baseline: (id: string) => adminRequest<CampaignStatBaseline | null>(`campaigns/${id}/stat-baseline`),
+  saveBaseline: (id: string, input: CampaignStatBaseline & { reason: string }) =>
+    adminRequest<CampaignStatBaseline>(`campaigns/${id}/stat-baseline`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    }),
 };
 export const donationsApi = {
   ...resourceApi<Donation>("donations"),

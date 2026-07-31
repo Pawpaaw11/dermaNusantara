@@ -3,12 +3,12 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowLeft, Archive, CircleStop, Plus, Rocket, Save } from "lucide-react";
+import { ArrowLeft, Archive, CheckCircle2, CircleStop, ImagePlus, Link2, Plus, Rocket, Save, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
-import { campaignsApi } from "@/lib/admin-api/resources";
+import { campaignsApi, mediaApi } from "@/lib/admin-api/resources";
 import { AdminError, Campaign } from "@/lib/admin-api/types";
 
 import {
@@ -18,6 +18,13 @@ import {
   PageHeader,
   StatusBadge,
 } from "./AdminUI";
+import {
+  CampaignBaselineEditor,
+  CampaignUpdatesEditor,
+  DonationConfigEditor,
+  DonationOptionsEditor,
+  PaymentMethodsEditor,
+} from "./CampaignEditors";
 
 const emptyForm = {
   categoryId: "",
@@ -239,7 +246,10 @@ export function CampaignEditorPage({ id }: { id?: string }) {
       )}
 
       <Tabs.Root defaultValue="information">
-        <Tabs.List className="mb-5 flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1">
+        <Tabs.List
+          aria-label="Bagian pengaturan program"
+          className="mb-5 flex gap-1.5 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-100/80 p-1.5 shadow-sm"
+        >
           {[
             ["information", "Informasi Program"],
             ["donation", "Konfigurasi Donasi"],
@@ -248,7 +258,11 @@ export function CampaignEditorPage({ id }: { id?: string }) {
             ["updates", "Berita Program"],
             ["baseline", "Statistik Awal"],
           ].map(([value, label]) => (
-            <Tabs.Trigger key={value} value={value} className="whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 data-[state=active]:bg-[var(--color-primary)] data-[state=active]:text-white">
+            <Tabs.Trigger
+              key={value}
+              value={value}
+              className="min-h-10 flex-1 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 outline-none transition-colors hover:bg-white hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:hover:bg-primary data-[state=active]:hover:text-white"
+            >
               {label}
             </Tabs.Trigger>
           ))}
@@ -271,8 +285,13 @@ export function CampaignEditorPage({ id }: { id?: string }) {
               <Field label="Lokasi" value={form.location} onChange={(location) => setForm({ ...form, location })} />
               <Field className="md:col-span-2" label="Deskripsi singkat" required value={form.shortDescription} onChange={(shortDescription) => setForm({ ...form, shortDescription })} />
               <TextArea className="md:col-span-2" label="Deskripsi lengkap" required value={form.description} onChange={(description) => setForm({ ...form, description })} />
-              <Field label="URL gambar sampul" required value={form.coverImageUrl} onChange={(coverImageUrl) => setForm({ ...form, coverImageUrl })} />
-              <Field label="Alt gambar" required value={form.coverImageAlt} onChange={(coverImageAlt) => setForm({ ...form, coverImageAlt })} />
+              <CoverImageField
+                className="md:col-span-2"
+                alt={form.coverImageAlt}
+                url={form.coverImageUrl}
+                onAltChange={(coverImageAlt) => setForm((current) => ({ ...current, coverImageAlt }))}
+                onUrlChange={(coverImageUrl) => setForm((current) => ({ ...current, coverImageUrl }))}
+              />
               <TextArea label="Cerita (satu paragraf per baris)" value={form.story} onChange={(story) => setForm({ ...form, story })} />
               <TextArea label="Highlight (satu item per baris)" value={form.highlights} onChange={(highlights) => setForm({ ...form, highlights })} />
               <label className="admin-field">
@@ -291,52 +310,229 @@ export function CampaignEditorPage({ id }: { id?: string }) {
               <Check label="Menerima donasi" checked={form.acceptingDonations} onChange={(acceptingDonations) => setForm({ ...form, acceptingDonations })} />
             </div>
             <div className="sticky bottom-4 flex justify-end rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur">
-              <button className="admin-button admin-button-primary" disabled={save.isPending}>
+              <button className="admin-button admin-button-primary" disabled={save.isPending || !form.coverImageUrl || !form.coverImageAlt}>
                 <Save size={17} /> {save.isPending ? "Menyimpan…" : "Simpan program"}
               </button>
             </div>
           </form>
         </Tabs.Content>
 
-        {["donation", "presets", "payments", "updates", "baseline"].map((tab) => (
-          <Tabs.Content key={tab} value={tab}>
-            <div className="admin-card p-6">
-              {!id ? (
-                <EmptyState title="Simpan program terlebih dahulu" description="Konfigurasi lanjutan tersedia setelah draft berhasil dibuat." />
-              ) : (
-                <CampaignSubresource campaignId={id} tab={tab} />
-              )}
-            </div>
-          </Tabs.Content>
-        ))}
+        <Tabs.Content value="donation">
+          <div className="admin-card p-6">
+            {!id || !campaign ? <EmptyState title="Simpan program terlebih dahulu" description="Konfigurasi donasi tersedia setelah draft berhasil dibuat." /> : <DonationConfigEditor campaign={campaign} />}
+          </div>
+        </Tabs.Content>
+        <Tabs.Content value="presets">
+          <div className="admin-card p-6">
+            {!id ? <EmptyState title="Simpan program terlebih dahulu" description="Preset nominal tersedia setelah draft berhasil dibuat." /> : <DonationOptionsEditor campaignId={id} />}
+          </div>
+        </Tabs.Content>
+        <Tabs.Content value="payments">
+          <div className="admin-card p-6">
+            {!id || !campaign ? <EmptyState title="Simpan program terlebih dahulu" description="Metode pembayaran tersedia setelah draft berhasil dibuat." /> : <PaymentMethodsEditor campaign={campaign} />}
+          </div>
+        </Tabs.Content>
+        <Tabs.Content value="updates">
+          <div className="admin-card p-6">
+            {!id ? <EmptyState title="Simpan program terlebih dahulu" description="Berita program tersedia setelah draft berhasil dibuat." /> : <CampaignUpdatesEditor campaignId={id} />}
+          </div>
+        </Tabs.Content>
+        <Tabs.Content value="baseline">
+          <div className="admin-card p-6">
+            {!id ? <EmptyState title="Simpan program terlebih dahulu" description="Statistik awal tersedia setelah draft berhasil dibuat." /> : <CampaignBaselineEditor campaignId={id} />}
+          </div>
+        </Tabs.Content>
       </Tabs.Root>
     </section>
   );
 }
 
-function CampaignSubresource({ campaignId, tab }: { campaignId: string; tab: string }) {
-  const query = useQuery({
-    queryKey: ["admin", "campaign", campaignId, tab],
-    queryFn: () => campaignsApi.subresource(campaignId, tab),
+function CoverImageField({
+  url,
+  alt,
+  onUrlChange,
+  onAltChange,
+  className = "",
+}: {
+  url: string;
+  alt: string;
+  onUrlChange: (value: string) => void;
+  onAltChange: (value: string) => void;
+  className?: string;
+}) {
+  const queryClient = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<"upload" | "url">("upload");
+  const [file, setFile] = useState<File>();
+  const [clientError, setClientError] = useState<string>();
+  const [localPreview, setLocalPreview] = useState<string>();
+
+  useEffect(() => {
+    if (!file) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLocalPreview(undefined);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setLocalPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  const upload = useMutation({
+    mutationFn: async () => {
+      const body = new FormData();
+      body.append("file", file!);
+      return mediaApi.upload(body);
+    },
+    onSuccess: async (response) => {
+      onUrlChange(response.data.url);
+      if (!alt.trim() && file) {
+        onAltChange(file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "));
+      }
+      setFile(undefined);
+      if (fileRef.current) fileRef.current.value = "";
+      await queryClient.invalidateQueries({ queryKey: ["admin", "media"] });
+    },
   });
-  if (query.isError) return <ErrorState error={query.error} onRetry={() => query.refetch()} />;
-  if (query.isLoading) return <div className="h-40 animate-pulse rounded-xl bg-slate-100 motion-reduce:animate-none" />;
+
+  const selectFile = (selected?: File) => {
+    setClientError(undefined);
+    upload.reset();
+    if (!selected) {
+      setFile(undefined);
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(selected.type)) {
+      setFile(undefined);
+      setClientError("Gunakan gambar JPEG, PNG, atau WebP.");
+      return;
+    }
+    if (selected.size > 5 * 1024 * 1024) {
+      setFile(undefined);
+      setClientError("Ukuran gambar maksimum 5 MB.");
+      return;
+    }
+    setFile(selected);
+  };
+
+  const preview = localPreview ?? url;
+
   return (
-    <div>
-      <h2 className="mb-2 text-lg font-bold text-slate-900">{subresourceLabels[tab]}</h2>
-      <p className="mb-5 text-sm text-slate-500">Data berikut berasal langsung dari Admin API.</p>
-      <pre className="max-h-[520px] overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">{JSON.stringify(query.data?.data ?? null, null, 2)}</pre>
+    <div className={`rounded-2xl border border-slate-200 bg-slate-50/70 p-5 ${className}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-bold text-slate-800">Gambar sampul <span className="text-red-600">*</span></h3>
+          <p className="mt-1 text-xs text-slate-500">Unggah gambar baru atau gunakan URL gambar yang sudah tersedia.</p>
+        </div>
+        <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm" aria-label="Sumber gambar">
+          <button
+            type="button"
+            onClick={() => setMode("upload")}
+            className={`inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors ${mode === "upload" ? "bg-primary text-white shadow-sm" : "text-slate-600 hover:bg-slate-50"}`}
+          >
+            <UploadCloud size={15} /> Upload file
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("url")}
+            className={`inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors ${mode === "url" ? "bg-primary text-white shadow-sm" : "text-slate-600 hover:bg-slate-50"}`}
+          >
+            <Link2 size={15} /> Gunakan URL
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div>
+          {mode === "upload" ? (
+            <div className="rounded-xl border-2 border-dashed border-slate-300 bg-white p-5 text-center">
+              <div className="mx-auto flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <ImagePlus size={22} />
+              </div>
+              <p className="mt-3 text-sm font-bold text-slate-800">{file ? file.name : "Pilih gambar program"}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "JPEG, PNG, atau WebP · maksimum 5 MB"}
+              </p>
+              <input
+                ref={fileRef}
+                className="sr-only"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => selectFile(event.target.files?.[0])}
+              />
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <button type="button" className="admin-button admin-button-secondary" onClick={() => fileRef.current?.click()}>
+                  Pilih file
+                </button>
+                <button
+                  type="button"
+                  className="admin-button admin-button-primary"
+                  disabled={!file || upload.isPending}
+                  onClick={() => upload.mutate()}
+                >
+                  <UploadCloud size={16} /> {upload.isPending ? "Mengunggah…" : "Upload & gunakan"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label className="admin-field">
+              <span>URL gambar sampul</span>
+              <input
+                required
+                type="url"
+                placeholder="https://contoh.com/gambar-program.jpg"
+                value={url}
+                onChange={(event) => onUrlChange(event.target.value)}
+              />
+              <small className="font-normal text-slate-500">Gunakan URL HTTPS yang dapat diakses publik.</small>
+            </label>
+          )}
+
+          {(clientError || upload.error?.message) && (
+            <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{clientError ?? upload.error?.message}</p>
+          )}
+          {mode === "upload" && url && !file && !upload.isPending && (
+            <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
+              <CheckCircle2 size={16} /> Gambar berhasil dipetakan ke program.
+            </p>
+          )}
+
+          <label className="admin-field mt-4">
+            <span>Alt gambar <span className="text-red-600">*</span></span>
+            <input
+              required
+              placeholder="Deskripsikan isi gambar untuk aksesibilitas"
+              value={alt}
+              onChange={(event) => onAltChange(event.target.value)}
+            />
+          </label>
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Preview sampul</p>
+          <div
+            role="img"
+            aria-label={alt || "Preview gambar sampul"}
+            className="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-slate-100 bg-cover bg-center"
+            style={preview ? { backgroundImage: `url("${preview.replaceAll('"', "%22")}")` } : undefined}
+          >
+            {!preview && (
+              <div className="flex size-full flex-col items-center justify-center gap-2 text-slate-400">
+                <ImagePlus size={28} />
+                <span className="text-xs font-medium">Belum ada gambar</span>
+              </div>
+            )}
+          </div>
+          {url && (
+            <p className="mt-2 break-all text-xs text-slate-500" title={url}>
+              URL tersimpan: {url}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-
-const subresourceLabels: Record<string, string> = {
-  donation: "Konfigurasi Donasi",
-  presets: "Preset Nominal",
-  payments: "Metode Pembayaran",
-  updates: "Berita Program",
-  baseline: "Statistik Awal",
-};
 
 function Field({ label, value, onChange, type = "text", required, className = "" }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; className?: string }) {
   return (

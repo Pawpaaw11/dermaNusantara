@@ -58,12 +58,74 @@ export type Campaign = {
   endsAt: string | null;
   updatedAt: string;
   category: { id: string; code: string; name: string };
-  donationConfig?: Record<string, unknown> | null;
-  donationOptions?: Array<Record<string, unknown>>;
-  paymentMethods?: Array<Record<string, unknown>>;
-  updates?: Array<Record<string, unknown>>;
-  statBaseline?: Record<string, unknown> | null;
+  donationConfig?: CampaignDonationConfig | null;
+  donationOptions?: CampaignDonationOption[];
+  paymentMethods?: CampaignPaymentLink[];
+  updates?: CampaignUpdate[];
+  statBaseline?: CampaignStatBaseline | null;
   _count?: { donations?: number; updates?: number };
+};
+
+export type CampaignDonationConfig = {
+  id?: string;
+  campaignId?: string;
+  inputType: "MONEY" | "QUANTITY";
+  currency: string;
+  minimumAmount: number | null;
+  maximumAmount: number | null;
+  allowCustomAmount: boolean | null;
+  unitName: string | null;
+  unitLabel: string | null;
+  unitPrice: number | null;
+  minimumQuantity: number | null;
+  maximumQuantity: number | null;
+  quantityStep: number | null;
+};
+
+export type CampaignDonationOption = {
+  id: string;
+  campaignId: string;
+  amount: number;
+  label: string | null;
+  sortOrder: number;
+  isActive: boolean;
+};
+
+export type PaymentMethodMaster = {
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  isActive: boolean;
+  minimumAmount: number | null;
+  maximumAmount: number | null;
+  uniqueCodeEnabled: boolean;
+  expiryMinutes: number;
+};
+
+export type CampaignPaymentLink = {
+  campaignId: string;
+  paymentMethodId: string;
+  isActive?: boolean;
+  paymentMethod: PaymentMethodMaster;
+};
+
+export type CampaignUpdate = {
+  id: string;
+  campaignId: string;
+  publishedAt: string;
+  title: string;
+  excerpt: string;
+  content: string[];
+  sortOrder: number;
+};
+
+export type CampaignStatBaseline = {
+  id?: string;
+  campaignId?: string;
+  collectedAmount: number;
+  collectedQuantity: number;
+  paidDonationCount: number;
 };
 
 export type Donation = {

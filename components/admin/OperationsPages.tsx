@@ -4,11 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   ArrowLeft,
+  ArrowRight,
   CalendarClock,
   CheckCircle2,
   CircleX,
   Copy,
   Eye,
+  Fingerprint,
   HeartHandshake,
   MapPin,
   MessageSquareText,
@@ -244,16 +246,7 @@ export function DonationDetailPage({ id }: { id: string }) {
             </SectionCard>
           </div>
 
-          {donation.auditLogs?.length ? (
-            <details className="admin-card group p-5">
-              <summary className="flex cursor-pointer list-none items-center gap-3 font-bold text-slate-900">
-                <span className="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-primary"><ShieldCheck size={18} /></span>
-                Audit teknis
-                <span className="ml-auto text-xs font-normal text-slate-500">{donation.auditLogs.length} aktivitas</span>
-              </summary>
-              <pre className="mt-4 max-h-96 overflow-auto rounded-xl bg-slate-950 p-4 text-xs leading-6 text-slate-100">{JSON.stringify(donation.auditLogs, null, 2)}</pre>
-            </details>
-          ) : null}
+          {donation.auditLogs?.length ? <AuditTimeline logs={donation.auditLogs} /> : null}
         </div>
 
         <aside className="admin-card sticky top-24 h-fit overflow-hidden">
@@ -316,6 +309,127 @@ function CopyValue({ label, value }: { label: string; value: string }) {
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(value));
+}
+
+function AuditTimeline({ logs }: { logs: Array<Record<string, unknown>> }) {
+  return (
+    <section className="admin-card overflow-hidden">
+      <div className="flex items-center gap-3 border-b border-slate-200 p-5 md:px-6">
+        <span className="flex size-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><ShieldCheck size={19} /></span>
+        <div>
+          <h2 className="font-bold text-slate-900">Audit teknis</h2>
+          <p className="mt-0.5 text-xs text-slate-500">Jejak perubahan administratif pada transaksi ini.</p>
+        </div>
+        <span className="ml-auto rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">{logs.length} aktivitas</span>
+      </div>
+      <ol className="divide-y divide-slate-100">
+        {logs.map((log, index) => {
+          const before = asRecord(log.beforeData);
+          const after = asRecord(log.afterData);
+          const actor = asRecord(log.actor);
+          const changes = auditChanges(before, after);
+          return (
+            <li className="p-5 md:p-6" key={String(log.id ?? index)}>
+              <div className="flex flex-col gap-4 md:flex-row md:items-start">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary-container text-primary"><ShieldCheck size={16} /></span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold text-slate-900">{auditActionLabel(String(log.action ?? "Aktivitas admin"))}</p>
+                      {log.entityType ? <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">{String(log.entityType)}</span> : null}
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {actor.name ? String(actor.name) : "Sistem"}
+                      {actor.email ? ` · ${String(actor.email)}` : ""}
+                    </p>
+                  </div>
+                </div>
+                <time className="whitespace-nowrap text-xs font-medium text-slate-500" dateTime={String(log.createdAt ?? "")}>
+                  {log.createdAt ? formatDateTime(String(log.createdAt)) : "—"}
+                </time>
+              </div>
+
+              {changes.length > 0 && (
+                <div className="mt-4 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">Perubahan data</p>
+                  {changes.map((change) => (
+                    <div className="grid gap-2 text-sm sm:grid-cols-[135px_1fr]" key={change.key}>
+                      <span className="font-medium text-slate-500">{humanizeAuditKey(change.key)}</span>
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <AuditValue value={change.before} muted />
+                        <ArrowRight className="shrink-0 text-slate-400" size={14} />
+                        <AuditValue value={change.after} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {Boolean(log.reason) && (
+                <div className="mt-4 rounded-xl border-l-4 border-secondary bg-secondary-container/25 px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-primary">Catatan admin</p>
+                  <p className="mt-1 text-sm text-slate-700">{String(log.reason)}</p>
+                </div>
+              )}
+
+              {(Boolean(log.requestId) || Boolean(log.ipAddress)) && (
+                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-400">
+                  {Boolean(log.requestId) && <span className="inline-flex items-center gap-1.5"><Fingerprint size={13} /> Request {String(log.requestId)}</span>}
+                  {Boolean(log.ipAddress) && <span>IP {String(log.ipAddress)}</span>}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
+function auditChanges(before: Record<string, unknown>, after: Record<string, unknown>) {
+  const keys = Array.from(new Set([...Object.keys(before), ...Object.keys(after)]));
+  return keys
+    .filter((key) => JSON.stringify(before[key]) !== JSON.stringify(after[key]))
+    .map((key) => ({ key, before: before[key], after: after[key] }));
+}
+
+function AuditValue({ value, muted = false }: { value: unknown; muted?: boolean }) {
+  const text = formatAuditValue(value);
+  return <span className={`max-w-full break-words rounded-lg px-2.5 py-1 text-xs font-bold ${muted ? "bg-white text-slate-500 line-through decoration-slate-300" : "bg-emerald-100 text-emerald-700"}`}>{text}</span>;
+}
+
+function formatAuditValue(value: unknown) {
+  if (value === null || value === undefined || value === "") return "Kosong";
+  if (typeof value === "boolean") return value ? "Ya" : "Tidak";
+  if (typeof value === "object") return Object.entries(asRecord(value)).map(([key, item]) => `${humanizeAuditKey(key)}: ${String(item)}`).join(", ") || "Data";
+  return String(value).replaceAll("_", " ");
+}
+
+function humanizeAuditKey(value: string) {
+  const labels: Record<string, string> = {
+    status: "Status",
+    bankReference: "Referensi bank",
+    verificationNote: "Catatan verifikasi",
+    verifiedAt: "Waktu verifikasi",
+    verifiedByAdminId: "Diverifikasi oleh",
+  };
+  return labels[value] ?? value.replace(/([A-Z])/g, " $1").replace(/^./, (character) => character.toUpperCase());
+}
+
+function auditActionLabel(action: string) {
+  const labels: Record<string, string> = {
+    DONATION_PAID: "Pembayaran diverifikasi",
+    DONATION_MANUAL_REVIEW: "Dipindahkan ke review manual",
+    DONATION_REJECTED: "Pembayaran ditolak",
+    DONATION_CANCELLED: "Donasi dibatalkan",
+  };
+  return labels[action] ?? action.replaceAll("_", " ").toLowerCase().replace(/^./, (character) => character.toUpperCase());
 }
 
 export function PaymentListPage() {
