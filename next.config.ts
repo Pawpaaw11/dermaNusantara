@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
         hostname: "placehold.co",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "dermanusantara.my.id",
+        pathname: "/uploads/**",
+      },
       { protocol: "http", hostname: "localhost", port: "3000", pathname: "/uploads/**" },
       { protocol: "http", hostname: "127.0.0.1", port: "3000", pathname: "/uploads/**" },
     ],
