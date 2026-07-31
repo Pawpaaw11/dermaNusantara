@@ -89,6 +89,11 @@ function AdminLoginContent() {
           <p className="mt-2 text-on-surface-variant">
             Gunakan akun admin Derma Nusantara.
           </p>
+          {params.get("reason") === "session-expired" ? (
+            <div className="mt-5 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container" role="alert">
+              Sesi berakhir, silakan masuk kembali.
+            </div>
+          ) : null}
 
           <form className="mt-8 space-y-5" onSubmit={form.handleSubmit(submit)}>
             <label className="block">

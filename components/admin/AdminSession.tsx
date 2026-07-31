@@ -28,7 +28,7 @@ export function AdminSessionProvider({
   useEffect(() => {
     if (query.error instanceof AdminApiError && query.error.status === 401) {
       window.location.replace(
-        `/admin/login?returnTo=${encodeURIComponent(pathname)}`,
+        `/admin/login?returnTo=${encodeURIComponent(pathname)}&reason=session-expired`,
       );
     }
   }, [pathname, query.error]);

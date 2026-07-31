@@ -4,20 +4,6 @@ const apiBaseUrl =
   process.env.API_BASE_URL ?? "http://localhost:3000/api/v1";
 const mutationMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
-function cookieHeaderWith(setCookies: string[], current: string) {
-  const values = new Map<string, string>();
-  for (const item of current.split(";")) {
-    const [key, ...rest] = item.trim().split("=");
-    if (key) values.set(key, rest.join("="));
-  }
-  for (const item of setCookies) {
-    const [pair] = item.split(";");
-    const [key, ...rest] = pair.split("=");
-    if (key) values.set(key, rest.join("="));
-  }
-  return [...values].map(([key, value]) => `${key}=${value}`).join("; ");
-}
-
 function getSetCookies(headers: Headers) {
   return typeof headers.getSetCookie === "function"
     ? headers.getSetCookie()
@@ -59,40 +45,8 @@ async function proxy(
   };
 
   try {
-    let response = await forward(originalCookie);
-    let cookiesToForward = getSetCookies(response.headers);
-    const isRefreshEndpoint =
-      path[0] === "auth" && ["login", "refresh"].includes(path[1] ?? "");
-
-    if (
-      response.status === 401 &&
-      !isRefreshEndpoint &&
-      request.cookies.has("admin_refresh")
-    ) {
-      const refresh = await fetch(`${apiBaseUrl}/admin/auth/refresh`, {
-        method: "POST",
-        headers: { cookie: originalCookie },
-        cache: "no-store",
-        signal: AbortSignal.timeout(15_000),
-      });
-      const refreshedCookies = getSetCookies(refresh.headers);
-      cookiesToForward = refreshedCookies;
-      if (refresh.ok) {
-        const retryCookie = cookieHeaderWith(refreshedCookies, originalCookie);
-        response = await forward(retryCookie);
-        cookiesToForward = [
-          ...refreshedCookies,
-          ...getSetCookies(response.headers),
-        ];
-      } else {
-        cookiesToForward = [
-          ...refreshedCookies,
-          "admin_access=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax",
-          "admin_refresh=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax",
-          "admin_csrf=; Path=/; Max-Age=0; SameSite=Lax",
-        ];
-      }
-    }
+    const response = await forward(originalCookie);
+    const cookiesToForward = getSetCookies(response.headers);
 
     const headers = new Headers();
     for (const name of ["content-type", "content-disposition", "retry-after"]) {
