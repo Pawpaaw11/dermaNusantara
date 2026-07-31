@@ -77,6 +77,7 @@ export async function ProgramHighlights() {
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
                   src={program.coverImageUrl}
+                  unoptimized={program.coverImageUrl.includes("/uploads/")}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/25 to-transparent" />
                 <div className="absolute left-4 top-4 rounded bg-primary px-2.5 py-1.5 font-label-sm text-label-sm text-on-primary shadow-sm md:left-5 md:top-5 md:px-3 md:py-2">

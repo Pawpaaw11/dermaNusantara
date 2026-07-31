@@ -77,6 +77,7 @@ export default async function DonationPage({ params }: DonationPageProps) {
                   priority
                   sizes="(min-width: 1024px) 58vw, 100vw"
                   src={program.coverImageUrl}
+                  unoptimized={program.coverImageUrl.includes("/uploads/")}
                 />
               </div>
 
