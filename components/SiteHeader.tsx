@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 
 function BrandMark() {
@@ -42,19 +44,34 @@ function BrandMark() {
 
 export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileScrollProgress, setMobileScrollProgress] = useState(0);
+  const pathname = usePathname();
+  const isHomepage = pathname === "/";
 
   useEffect(() => {
+    let animationFrame = 0;
+
     const updateHeaderState = () => {
-      setIsScrolled(window.scrollY > 12);
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 12);
+        setMobileScrollProgress(Math.min(window.scrollY / 160, 1));
+      });
     };
 
     updateHeaderState();
     window.addEventListener("scroll", updateHeaderState, { passive: true });
 
-    return () => window.removeEventListener("scroll", updateHeaderState);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      window.removeEventListener("scroll", updateHeaderState);
+    };
   }, []);
 
   const hasSolidBackground = isScrolled;
+  const mobileProgress = isHomepage ? mobileScrollProgress : 1;
+  const mobileBrandScale = 0.62 + mobileProgress * 0.38;
+  const mobileDonateScale = 0.68 + mobileProgress * 0.32;
 
   return (
     <header
@@ -67,8 +84,9 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex w-full max-w-container-max items-center justify-between px-margin-mobile py-4 md:px-margin-desktop">
         <Link
-          className="flex items-center gap-3"
+          className="flex origin-left scale-[var(--mobile-brand-scale)] items-center gap-3 transition-transform duration-100 ease-out md:scale-100"
           href="/"
+          style={{ "--mobile-brand-scale": mobileBrandScale } as CSSProperties}
         >
           <BrandMark />
           <div className="flex items-baseline gap-1.5 font-display-lg-mobile text-[1rem] font-extrabold uppercase leading-none md:text-[1.5rem]">
@@ -79,8 +97,9 @@ export function SiteHeader() {
 
         <nav className="flex items-center" aria-label="Aksi utama">
           <Link
-            className="glossy-cta ambient-shadow hover-lift inline-flex min-w-[136px] justify-center rounded-full bg-primary px-9 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim"
+            className="glossy-cta ambient-shadow hover-lift inline-flex min-w-[136px] origin-right scale-[var(--mobile-donate-scale)] justify-center rounded-full bg-primary px-9 py-2.5 font-label-md text-label-md text-on-primary transition-all duration-100 ease-out hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim md:scale-100"
             href="/#programs"
+            style={{ "--mobile-donate-scale": mobileDonateScale } as CSSProperties}
           >
             Donate
           </Link>
