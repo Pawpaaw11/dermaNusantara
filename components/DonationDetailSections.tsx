@@ -21,14 +21,14 @@ export function CampaignAboutSection({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className="mt-8 border-b border-outline-variant/40 pb-8">
-      <h2 className="font-headline-sm text-headline-sm text-primary">
+    <section className="mt-6 rounded-[24px] border border-outline-variant/40 bg-surface p-5 shadow-sm lg:mt-8 lg:rounded-none lg:border-x-0 lg:border-t-0 lg:bg-transparent lg:p-0 lg:pb-8 lg:shadow-none">
+      <h2 className="text-xl font-bold leading-7 text-primary lg:font-headline-sm lg:text-headline-sm">
         Tentang program
       </h2>
-      <div className="relative mt-4 max-w-3xl">
+      <div className="relative mt-3 max-w-3xl lg:mt-4">
         <div
-          className={`space-y-5 overflow-hidden font-body-lg text-body-lg leading-8 text-on-surface-variant transition-[max-height] duration-500 lg:max-h-none lg:overflow-visible ${
-            expanded ? "max-h-[200rem]" : "max-h-40"
+          className={`space-y-4 overflow-hidden text-[1rem] leading-7 text-on-surface-variant transition-[max-height] duration-500 lg:max-h-none lg:space-y-5 lg:overflow-visible lg:font-body-lg lg:text-body-lg lg:leading-8 ${
+            expanded ? "max-h-[200rem]" : "max-h-[8.75rem]"
           }`}
         >
           <p>{description}</p>
@@ -62,29 +62,29 @@ export function RecentDonorsSection({ donors }: { donors: Donor[] }) {
 
   const row = (donor: Donor, index: number) => (
     <div
-      className="flex items-center justify-between gap-4 border-b border-outline-variant/30 px-4 py-4 last:border-b-0 md:px-6 md:py-5"
+      className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-outline-variant/30 px-3.5 py-3.5 last:border-b-0 md:px-6 md:py-5"
       key={`${donor.donorDisplayName}-${donor.donatedAt}-${index}`}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-secondary">
-          <UserRound size={20} />
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-secondary md:size-11">
+          <UserRound size={18} />
         </div>
-        <p className="truncate font-label-md text-label-md text-on-background">
+        <p className="truncate text-sm font-semibold text-on-background md:font-label-md md:text-label-md">
           {donor.donorDisplayName}
         </p>
       </div>
-      <p className="shrink-0 font-label-md text-label-md text-primary">
+      <p className="whitespace-nowrap text-sm font-bold text-primary md:font-label-md md:text-label-md">
         Rp {currencyFormatter.format(donor.amount)}
       </p>
     </div>
   );
 
   return (
-    <section className="mt-8">
-      <h2 className="font-headline-sm text-headline-sm text-primary">Donatur</h2>
+    <section className="mt-6 rounded-[24px] border border-outline-variant/40 bg-surface p-5 shadow-sm lg:mt-8 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+      <h2 className="text-xl font-bold leading-7 text-primary lg:font-headline-sm lg:text-headline-sm">Donatur</h2>
       {latestDonors.length ? (
         <>
-          <div className="ambient-shadow relative mt-5 overflow-hidden rounded-lg border border-outline-variant/40 bg-surface lg:hidden">
+          <div className="relative mt-4 overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-low lg:hidden">
             {mobileDonors.map(row)}
             {!expanded && latestDonors.length > 3 ? (
               <div

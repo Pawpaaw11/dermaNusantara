@@ -11,20 +11,20 @@ export default function DonationDetailLoading() {
       <main className="bg-background">
         <section
           aria-busy="true"
-          className="px-margin-mobile pb-20 pt-8 md:px-margin-desktop md:pb-24"
+          className="px-margin-mobile pb-20 pt-5 md:px-margin-desktop md:pb-24 lg:pt-8"
           role="status"
         >
           <span className="sr-only">Memuat program donasi</span>
 
           <div
             aria-hidden
-            className="mx-auto grid max-w-container-max gap-10 lg:grid-cols-12 lg:gap-12"
+            className="mx-auto grid max-w-container-max gap-8 lg:grid-cols-12 lg:gap-12"
           >
             <article className="lg:col-span-7">
               <div className={`${skeletonClass} h-5 w-52`} />
-              <div className={`${skeletonClass} mt-7 h-12 w-4/5 max-w-lg`} />
+              <div className={`${skeletonClass} mt-5 h-10 w-4/5 max-w-lg lg:mt-7 lg:h-12`} />
               <div
-                className={`${skeletonClass} ambient-shadow relative mt-8 aspect-[16/10] w-full rounded-lg`}
+                className={`${skeletonClass} ambient-shadow relative mt-5 aspect-video w-full rounded-[20px] lg:mt-8 lg:aspect-[16/10] lg:rounded-lg`}
               />
 
               <section className="mt-8 border-b border-outline-variant/40 pb-8">

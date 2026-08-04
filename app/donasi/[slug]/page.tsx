@@ -58,11 +58,11 @@ export default async function DonationPage({ params }: DonationPageProps) {
   return (
     <>
       <SiteHeader />
-      <main className="bg-background">
-        <section className="px-margin-mobile pb-36 pt-8 md:px-margin-desktop lg:pb-24">
-          <div className="mx-auto grid max-w-container-max gap-10 lg:grid-cols-12 lg:gap-12">
+      <main className="overflow-x-hidden bg-background">
+        <section className="px-margin-mobile pb-36 pt-5 md:px-margin-desktop lg:pb-24 lg:pt-8">
+          <div className="mx-auto grid max-w-container-max gap-8 lg:grid-cols-12 lg:gap-12">
             <article className="lg:col-span-7">
-              <div className="flex flex-wrap items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+              <div className="flex min-w-0 items-center gap-2 overflow-hidden font-label-sm text-label-sm text-on-surface-variant">
                 <Link
                   className="inline-flex items-center gap-2 transition-colors hover:text-primary"
                   href="/#programs"
@@ -70,17 +70,17 @@ export default async function DonationPage({ params }: DonationPageProps) {
                   <ArrowLeft size={14} />
                   Kembali ke program
                 </Link>
-                <span>/</span>
-                <span className="text-primary">{program.category.name}</span>
+                <span aria-hidden className="shrink-0">/</span>
+                <span className="truncate text-primary">{program.category.name}</span>
               </div>
 
-              <div className="mt-6 max-w-3xl">
-                <h1 className="font-display-lg-mobile text-[2.3rem] leading-tight text-primary md:text-display-lg">
+              <div className="mt-4 max-w-3xl lg:mt-6">
+                <h1 className="text-[1.85rem] font-extrabold leading-[1.18] text-primary sm:text-[2.15rem] md:text-display-lg lg:font-display-lg-mobile">
                   {program.title}
                 </h1>
               </div>
 
-              <div className="ambient-shadow relative mt-8 aspect-[16/10] overflow-hidden rounded-lg bg-surface">
+              <div className="ambient-shadow relative mt-5 aspect-video overflow-hidden rounded-[20px] bg-surface lg:mt-8 lg:aspect-[16/10] lg:rounded-lg">
                 <Image
                   alt={program.coverImageAlt}
                   className="object-cover"

@@ -8,7 +8,7 @@ const legalLinks = [
 ];
 
 const address =
-  "Sambung, Mojokarang, Kec. Dlanggu, Kabupaten Mojokerto, Jawa Timur 61371";
+  "Mojokarang, Kec. Dlanggu, Kabupaten Mojokerto, Jawa Timur";
 
 export function Footer() {
   return (

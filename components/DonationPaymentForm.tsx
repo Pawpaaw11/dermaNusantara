@@ -167,22 +167,22 @@ export function DonationPaymentForm({
 
   return (
     <div className="scroll-mt-24" id="donation-form">
-      <div className="ambient-shadow overflow-hidden rounded-[32px] border border-outline-variant/40 bg-surface-container-lowest">
-        <div className="bg-primary px-5 py-6 text-on-primary sm:px-8 sm:py-7">
-          <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-4">
+      <div className="ambient-shadow overflow-hidden rounded-[24px] border border-outline-variant/40 bg-surface-container-lowest sm:rounded-[32px]">
+        <div className="bg-primary px-4 py-5 text-on-primary sm:px-8 sm:py-7">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(6.5rem,auto)] items-start gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
             <div className="min-w-0">
               <p className="font-label-sm text-label-sm text-primary-fixed-dim">
                 Donasi terkumpul
               </p>
-              <p className="mt-2 break-words text-[1.75rem] font-extrabold leading-tight sm:font-headline-md sm:text-headline-md">
+              <p className="mt-1.5 break-words text-[1.5rem] font-extrabold leading-tight sm:mt-2 sm:font-headline-md sm:text-headline-md">
                 {formatCurrency(program.progress.collectedAmount)}
               </p>
             </div>
-            <div className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-4 py-3 sm:w-auto sm:min-w-32 sm:block sm:rounded-3xl sm:py-2 sm:text-right">
+            <div className="min-w-0 rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-right sm:w-auto sm:min-w-32 sm:rounded-3xl sm:px-4">
               <p className="font-label-sm text-label-sm text-primary-fixed-dim">
                 Target
               </p>
-              <p className="font-label-md text-label-md sm:mt-1">{targetLabel}</p>
+              <p className="mt-1 break-words text-sm font-bold leading-5 sm:font-label-md sm:text-label-md">{targetLabel}</p>
             </div>
           </div>
 
@@ -209,7 +209,7 @@ export function DonationPaymentForm({
         </div>
 
         <form
-          className="flex flex-col gap-7 px-5 py-7 sm:px-8 sm:py-8"
+          className="flex flex-col gap-6 px-4 py-6 sm:gap-7 sm:px-8 sm:py-8"
           onSubmit={(event) => {
             event.preventDefault();
             setSubmitError(null);
@@ -283,13 +283,13 @@ export function DonationPaymentForm({
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                   {amountOptions.map((amount) => {
                     const isActive = selectedAmount === amount;
 
                     return (
                       <button
-                        className={`rounded-2xl border px-4 py-3 text-left font-label-md text-label-md transition-all ${
+                        className={`min-w-0 rounded-2xl border px-3 py-3 text-center text-sm font-bold transition-all sm:px-4 sm:text-left sm:font-label-md sm:text-label-md ${
                           isActive
                             ? "border-primary bg-primary-fixed text-primary"
                             : "border-outline-variant bg-surface text-on-background hover:border-primary hover:bg-primary-fixed/40"
@@ -392,7 +392,7 @@ export function DonationPaymentForm({
 
                 return (
                   <button
-                    className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition-all ${
+                    className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-3.5 py-3.5 text-left transition-all sm:px-4 sm:py-4 ${
                       isActive
                         ? "border-primary bg-primary-fixed/70"
                         : "border-outline-variant bg-surface hover:border-primary/50"
@@ -401,21 +401,21 @@ export function DonationPaymentForm({
                     onClick={() => setSelectedMethod(method.id)}
                     type="button"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-11 items-center justify-center rounded-full bg-secondary/20 text-secondary">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-secondary sm:size-11">
                         <Icon size={20} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="font-label-md text-label-md text-on-background">
                           {method.label}
                         </p>
-                        <p className="mt-1 font-label-sm text-label-sm text-on-surface-variant">
+                        <p className="mt-1 text-xs leading-5 text-on-surface-variant sm:font-label-sm sm:text-label-sm">
                           {method.description}
                         </p>
                       </div>
                     </div>
                     {isActive ? (
-                      <CheckCircle2 className="text-primary" size={20} />
+                      <CheckCircle2 className="shrink-0 text-primary" size={20} />
                     ) : null}
                   </button>
                 );
@@ -449,11 +449,11 @@ export function DonationPaymentForm({
         <div
           aria-labelledby="donation-summary-title"
           aria-modal="true"
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-inverse-surface/45 px-margin-mobile backdrop-blur-sm"
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-inverse-surface/45 px-0 backdrop-blur-sm sm:items-center sm:px-margin-mobile"
           role="dialog"
         >
-          <div className="ambient-shadow w-full max-w-md overflow-hidden rounded-[28px] border border-outline-variant/40 bg-surface">
-            <div className="flex items-center justify-between gap-4 border-b border-outline-variant/40 px-6 py-5">
+          <div className="ambient-shadow max-h-[92svh] w-full max-w-md overflow-y-auto rounded-t-[28px] border border-outline-variant/40 bg-surface sm:rounded-[28px]">
+            <div className="flex items-center justify-between gap-4 border-b border-outline-variant/40 px-5 py-4 sm:px-6 sm:py-5">
               <div className="flex items-center gap-3">
                 <div className="flex size-11 items-center justify-center rounded-full bg-secondary/20 text-secondary">
                   <ShieldCheck size={20} />
@@ -475,7 +475,7 @@ export function DonationPaymentForm({
               </button>
             </div>
 
-            <div className="space-y-3 px-6 py-6 font-body-md text-body-md text-on-surface-variant">
+            <div className="space-y-3 px-5 py-5 font-body-md text-body-md text-on-surface-variant sm:px-6 sm:py-6">
               <p>Program: {program.title}</p>
               <p>
                 {isQuantityMode ? "Total: " : "Nominal: "}
@@ -492,7 +492,7 @@ export function DonationPaymentForm({
               <p>Nama tampil: {displayDonorName}</p>
             </div>
 
-            <div className="grid gap-3 bg-surface-container px-6 py-5 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 bg-surface-container px-5 py-4 sm:px-6 sm:py-5">
               <button
                 className="rounded-full border border-outline-variant bg-surface px-6 py-3 font-label-md text-label-md text-primary transition-colors hover:bg-primary-fixed/30"
                 onClick={() => setShowSummary(false)}

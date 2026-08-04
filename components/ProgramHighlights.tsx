@@ -27,7 +27,17 @@ export async function ProgramHighlights() {
 
   try {
     const response = await getCampaigns();
-    campaigns = response.data;
+    campaigns = [...response.data].sort((first, second) => {
+      const preferredOrder: Record<string, number> = {
+        "sedekah-al-quran": 0,
+        "operasional-pondok": 2,
+      };
+
+      return (
+        (preferredOrder[first.slug] ?? 1) -
+        (preferredOrder[second.slug] ?? 1)
+      );
+    });
   } catch {
     failedToLoad = true;
   }

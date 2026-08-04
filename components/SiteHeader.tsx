@@ -72,6 +72,8 @@ export function SiteHeader() {
   const mobileProgress = isHomepage ? mobileScrollProgress : 1;
   const mobileBrandScale = 0.43 + mobileProgress * 0.57;
   const mobileDonateScale = 0.45 + mobileProgress * 0.55;
+  const mobileHorizontalShift = (1 - mobileProgress) * 12;
+  const mobileHeaderPadding = 6 + mobileProgress * 10;
 
   return (
     <header
@@ -82,11 +84,17 @@ export function SiteHeader() {
       }`}
       id="main-nav"
     >
-      <div className="mx-auto flex w-full max-w-container-max items-center justify-between px-margin-mobile py-4 md:px-margin-desktop">
+      <div
+        className="mx-auto flex w-full max-w-container-max items-center justify-between px-margin-mobile py-[var(--mobile-header-padding)] md:px-margin-desktop md:py-4"
+        style={{ "--mobile-header-padding": `${mobileHeaderPadding}px` } as CSSProperties}
+      >
         <Link
-          className="flex origin-left scale-[var(--mobile-brand-scale)] items-center gap-3 transition-transform duration-100 ease-out md:scale-100"
+          className="flex origin-left items-center gap-3 [transform:translateX(var(--mobile-shift))_scale(var(--mobile-scale))] transition-transform duration-100 ease-out md:transform-none"
           href="/"
-          style={{ "--mobile-brand-scale": mobileBrandScale } as CSSProperties}
+          style={{
+            "--mobile-shift": `${mobileHorizontalShift}px`,
+            "--mobile-scale": mobileBrandScale,
+          } as CSSProperties}
         >
           <BrandMark />
           <div className="flex items-baseline gap-1.5 font-display-lg-mobile text-[1rem] font-extrabold uppercase leading-none md:text-[1.5rem]">
@@ -97,11 +105,14 @@ export function SiteHeader() {
 
         <nav className="flex items-center" aria-label="Aksi utama">
           <Link
-            className="glossy-cta ambient-shadow hover-lift inline-flex min-w-[136px] origin-right scale-[var(--mobile-donate-scale)] justify-center rounded-full bg-primary px-9 py-2.5 font-label-md text-label-md text-on-primary transition-all duration-100 ease-out hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim md:scale-100"
+            className="glossy-cta ambient-shadow hover-lift inline-flex min-w-[136px] origin-right justify-center rounded-full bg-primary px-9 py-2.5 font-label-md text-label-md text-on-primary [transform:translateX(var(--mobile-shift))_scale(var(--mobile-scale))] transition-all duration-100 ease-out hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim md:transform-none"
             href="/#programs"
-            style={{ "--mobile-donate-scale": mobileDonateScale } as CSSProperties}
+            style={{
+              "--mobile-shift": `-${mobileHorizontalShift}px`,
+              "--mobile-scale": mobileDonateScale,
+            } as CSSProperties}
           >
-            Donate
+            Donasi
           </Link>
         </nav>
       </div>
