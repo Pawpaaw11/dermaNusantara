@@ -13,7 +13,6 @@ const titleMap: Record<string, string> = {
   operasional: "Operasional",
   donasi: "Donasi",
   pembayaran: "Pembayaran",
-  verifikasi: "Perlu Verifikasi",
   program: "Program",
   kategori: "Kategori Program",
   media: "Media",

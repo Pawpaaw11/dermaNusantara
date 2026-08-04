@@ -54,7 +54,7 @@ export function SiteHeader() {
     const updateHeaderState = () => {
       cancelAnimationFrame(animationFrame);
       animationFrame = requestAnimationFrame(() => {
-        setIsScrolled(window.scrollY > 12);
+        setIsScrolled(window.scrollY > (isHomepage ? 72 : 12));
         setMobileScrollProgress(Math.min(window.scrollY / 160, 1));
       });
     };
@@ -66,12 +66,12 @@ export function SiteHeader() {
       cancelAnimationFrame(animationFrame);
       window.removeEventListener("scroll", updateHeaderState);
     };
-  }, []);
+  }, [isHomepage]);
 
   const hasSolidBackground = isScrolled;
   const mobileProgress = isHomepage ? mobileScrollProgress : 1;
-  const mobileBrandScale = 0.62 + mobileProgress * 0.38;
-  const mobileDonateScale = 0.68 + mobileProgress * 0.32;
+  const mobileBrandScale = 0.43 + mobileProgress * 0.57;
+  const mobileDonateScale = 0.45 + mobileProgress * 0.55;
 
   return (
     <header

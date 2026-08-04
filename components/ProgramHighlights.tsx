@@ -90,7 +90,7 @@ export async function ProgramHighlights() {
 
               <div className="flex flex-grow flex-col px-4 pt-0 md:px-5">
                 <div className="-mt-px mb-4 w-fit rounded-br-lg bg-secondary px-3 py-1.5 font-label-md text-label-md text-on-secondary md:mb-5 md:px-4 md:py-2">
-                  {program.category.name} Pelosok Negeri
+                  {program.cardBadgeText}
                 </div>
 
                 <h3 className="font-headline-sm text-[1.15rem] font-bold leading-6 text-primary md:text-headline-sm">

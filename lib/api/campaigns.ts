@@ -24,6 +24,7 @@ export type CampaignDetail = {
   id: string;
   slug: string;
   title: string;
+  cardBadgeText: string;
   shortDescription: string;
   description: string;
   coverImageUrl: string;
@@ -76,6 +77,7 @@ export type CampaignListItem = {
   id: string;
   slug: string;
   title: string;
+  cardBadgeText: string;
   shortDescription: string;
   coverImageUrl: string;
   coverImageAlt: string;

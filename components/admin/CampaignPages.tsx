@@ -31,6 +31,7 @@ const emptyForm = {
   categoryId: "",
   slug: "",
   title: "",
+  cardBadgeText: "",
   shortDescription: "",
   description: "",
   coverImageUrl: "",
@@ -134,6 +135,7 @@ export function CampaignEditorPage({ id }: { id?: string }) {
       categoryId: item.categoryId,
       slug: item.slug,
       title: item.title,
+      cardBadgeText: item.cardBadgeText ?? `${item.category.name} Pelosok Negeri`,
       shortDescription: item.shortDescription,
       description: item.description,
       coverImageUrl: item.coverImageUrl,
@@ -157,6 +159,7 @@ export function CampaignEditorPage({ id }: { id?: string }) {
         categoryId: form.categoryId,
         slug: form.slug,
         title: form.title,
+        cardBadgeText: form.cardBadgeText,
         shortDescription: form.shortDescription,
         description: form.description,
         coverImageUrl: form.coverImageUrl,
@@ -283,6 +286,13 @@ export function CampaignEditorPage({ id }: { id?: string }) {
                   {categories.data?.data.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}
                 </select>
               </label>
+              <Field
+                label="Badge kartu program"
+                value={form.cardBadgeText}
+                onChange={(cardBadgeText) => setForm({ ...form, cardBadgeText })}
+                placeholder="Contoh: Pendidikan Pelosok Negeri"
+                maxLength={80}
+              />
               <Field label="Lokasi" value={form.location} onChange={(location) => setForm({ ...form, location })} />
               <Field className="md:col-span-2" label="Deskripsi singkat" required value={form.shortDescription} onChange={(shortDescription) => setForm({ ...form, shortDescription })} />
               <TextArea className="md:col-span-2" label="Deskripsi lengkap" required value={form.description} onChange={(description) => setForm({ ...form, description })} />
@@ -535,11 +545,11 @@ export function CoverImageField({
   );
 }
 
-function Field({ label, value, onChange, type = "text", required, className = "" }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; className?: string }) {
+function Field({ label, value, onChange, type = "text", required, className = "", placeholder, maxLength }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; className?: string; placeholder?: string; maxLength?: number }) {
   return (
     <label className={`admin-field ${className}`}>
       <span>{label}</span>
-      <input required={required} type={type} value={value} onChange={(event) => onChange(event.target.value)} />
+      <input required={required} type={type} value={value} placeholder={placeholder} maxLength={maxLength} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
 }

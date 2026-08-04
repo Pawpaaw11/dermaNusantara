@@ -59,15 +59,15 @@ export default function DonationDetailLoading() {
             </article>
 
             <aside className="lg:col-span-5">
-              <div className="lg:sticky lg:top-28">
+              <div>
                 <div className="ambient-shadow overflow-hidden rounded-[32px] border border-outline-variant/40 bg-surface-container-lowest">
-                  <div className="bg-primary/80 px-8 py-7">
-                    <div className="flex justify-between gap-4">
+                  <div className="bg-primary/80 px-5 py-6 sm:px-8 sm:py-7">
+                    <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-4">
                       <div>
                         <div className="h-4 w-28 animate-pulse rounded bg-white/25 motion-reduce:animate-none" />
                         <div className="mt-3 h-8 w-40 animate-pulse rounded bg-white/30 motion-reduce:animate-none" />
                       </div>
-                      <div className="h-14 w-28 animate-pulse rounded-full bg-white/20 motion-reduce:animate-none" />
+                      <div className="h-12 w-full animate-pulse rounded-2xl bg-white/20 motion-reduce:animate-none sm:h-14 sm:w-28 sm:rounded-full" />
                     </div>
                     <div className="mt-6 h-3 w-full animate-pulse rounded-full bg-white/20 motion-reduce:animate-none" />
                     <div className="mt-4 flex justify-between">
@@ -76,7 +76,7 @@ export default function DonationDetailLoading() {
                     </div>
                   </div>
 
-                  <div className="space-y-7 px-8 py-8">
+                  <div className="space-y-7 px-5 py-7 sm:px-8 sm:py-8">
                     <div>
                       <div className={`${skeletonClass} mb-3 h-5 w-32`} />
                       <div className="grid grid-cols-2 gap-3">

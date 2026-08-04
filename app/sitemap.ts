@@ -9,6 +9,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), changeFrequency: "daily", priority: 1 },
     { url: absoluteUrl("/berita"), changeFrequency: "daily", priority: 0.8 },
+    { url: absoluteUrl("/kebijakan-privasi"), changeFrequency: "yearly", priority: 0.3 },
+    { url: absoluteUrl("/syarat-ketentuan"), changeFrequency: "yearly", priority: 0.3 },
+    { url: absoluteUrl("/panduan-donasi"), changeFrequency: "monthly", priority: 0.5 },
   ];
   const [campaigns, firstArticles] = await Promise.all([
     getCampaignsForSitemap().catch(() => []),

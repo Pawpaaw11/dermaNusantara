@@ -1,21 +1,20 @@
-import Link from "next/link";
-import { ArrowRight, ChartColumn, ShieldCheck } from "lucide-react";
+import { Newspaper, ShieldCheck } from "lucide-react";
 
 const features = [
   {
     title: "Sistem Keamanan Tinggi",
     description:
-      "Data dan donasi Anda dilindungi dengan enkripsi standar perbankan.",
+      "Akses dibatasi, data divalidasi, sesi diamankan, dan aktivitas pengelolaan dicatat secara berlapis.",
     icon: ShieldCheck,
     cardClass: "bg-surface-container-low text-primary",
     iconClass: "bg-secondary-fixed-dim text-on-secondary-fixed-variant",
     textClass: "text-on-surface-variant",
   },
   {
-    title: "Laporan Real-time",
+    title: "Laporan Berkala",
     description:
-      "Akses laporan keuangan dan update penyaluran program kapan saja.",
-    icon: ChartColumn,
+      "Perkembangan program dan penyaluran donasi kami sampaikan secara berkala melalui berita Derma Nusantara.",
+    icon: Newspaper,
     cardClass: "bg-primary-container text-on-primary",
     iconClass: "bg-primary-fixed text-primary",
     textClass: "text-primary-fixed-dim",
@@ -32,20 +31,13 @@ export function TransparencySection() {
         <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-12">
           <div className="space-y-6 md:col-span-5">
             <h2 className="font-display-lg-mobile text-display-lg-mobile text-primary md:font-headline-md md:text-headline-md">
-              Setiap rupiah dapat dilacak.
+              Keamanan dan amanah dalam setiap langkah.
             </h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant">
-              Kami percaya transparansi adalah kunci dari amanah. Lihat laporan
-              penyaluran dana secara real-time dan rasakan ketenangan dalam
-              berbagi.
+              Keamanan data dan akuntabilitas program menjadi prioritas kami.
+              Setiap perkembangan program serta laporan penyaluran disampaikan
+              secara berkala melalui berita Derma Nusantara.
             </p>
-            <Link
-              className="flex items-center gap-2 font-label-md text-label-md text-secondary hover:underline"
-              href="#"
-            >
-              Lihat Laporan Transparansi
-              <ArrowRight aria-hidden size={16} />
-            </Link>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:col-span-7">

@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronRight,
   CircleDollarSign,
-  ClipboardCheck,
   CreditCard,
   ExternalLink,
   FileBarChart,
@@ -43,18 +42,10 @@ type Item = {
   href: string;
   icon: typeof LayoutDashboard;
   roles: AdminRole[];
-  badge?: "verification";
+  badge?: "pending-payment";
 };
 
 const groups: Array<{ label: string; items: Item[] }> = [
-  {
-    label: "Konten",
-    items: [
-      { label: "Artikel", href: "/admin/konten/artikel", icon: Newspaper, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
-      { label: "Kategori Artikel", href: "/admin/konten/kategori-artikel", icon: Tags, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
-      { label: "Hero Slider", href: "/admin/konten/slider", icon: ImageIcon, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
-    ],
-  },
   {
     label: "Utama",
     items: [
@@ -69,9 +60,8 @@ const groups: Array<{ label: string; items: Item[] }> = [
   {
     label: "Operasional",
     items: [
-      { label: "Donasi", href: "/admin/operasional/donasi", icon: ReceiptText, roles: ["SUPER_ADMIN", "VERIFIER"] },
+      { label: "Donasi", href: "/admin/operasional/donasi", icon: ReceiptText, roles: ["SUPER_ADMIN", "VERIFIER"], badge: "pending-payment" },
       { label: "Pembayaran", href: "/admin/operasional/pembayaran", icon: CircleDollarSign, roles: ["SUPER_ADMIN", "VERIFIER"] },
-      { label: "Perlu Verifikasi", href: "/admin/operasional/verifikasi", icon: ClipboardCheck, roles: ["SUPER_ADMIN", "VERIFIER"], badge: "verification" },
     ],
   },
   {
@@ -81,6 +71,14 @@ const groups: Array<{ label: string; items: Item[] }> = [
       { label: "Kategori Program", href: "/admin/program/kategori", icon: Tags, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
       { label: "Media", href: "/admin/program/media", icon: ImageIcon, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
       { label: "Buat Program Baru", href: "/admin/program/baru", icon: Megaphone, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
+    ],
+  },
+  {
+    label: "Konten",
+    items: [
+      { label: "Artikel", href: "/admin/konten/artikel", icon: Newspaper, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
+      { label: "Kategori Artikel", href: "/admin/konten/kategori-artikel", icon: Tags, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
+      { label: "Hero Slider", href: "/admin/konten/slider", icon: ImageIcon, roles: ["SUPER_ADMIN", "CAMPAIGN_MANAGER"] },
     ],
   },
   {
@@ -151,6 +149,9 @@ export function AdminDrawer({
     queryFn: () => dashboardApi.summary().then((r) => r.data),
     enabled: ["SUPER_ADMIN", "VERIFIER"].includes(admin.role),
   });
+  const pendingPayment =
+    summary.data?.byStatus.find((item) => item.status === "PENDING_PAYMENT")
+      ?.count ?? 0;
 
   return (
     <aside
@@ -218,10 +219,9 @@ export function AdminDrawer({
                       <span className={cn("truncate", collapsed && !mobile && "sr-only")}>
                         {item.label}
                       </span>
-                      {item.badge === "verification" &&
-                      summary.data?.pendingReview ? (
+                      {item.badge === "pending-payment" && pendingPayment > 0 ? (
                         <span className={cn("ml-auto rounded-full bg-tertiary px-2 py-0.5 text-[10px] font-bold text-on-tertiary", collapsed && !mobile && "absolute right-1 top-1 size-2 p-0 text-transparent")}>
-                          {summary.data.pendingReview}
+                          {pendingPayment > 99 ? "99+" : pendingPayment}
                         </span>
                       ) : null}
                     </Link>

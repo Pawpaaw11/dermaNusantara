@@ -35,7 +35,7 @@ import { useAdminSession } from "./AdminSession";
 
 const rupiah = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
 
-export function DonationListPage({ initialStatus }: { initialStatus?: string }) {
+export function DonationListPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { admin } = useAdminSession();
@@ -43,20 +43,12 @@ export function DonationListPage({ initialStatus }: { initialStatus?: string }) 
   const [search, setSearch] = useState(params.get("search") ?? "");
   const [selected, setSelected] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<{ ids: string[]; label: string }>();
-  const status = params.get("status") ?? (initialStatus === "verification" ? "" : initialStatus) ?? "";
+  const status = params.get("status") ?? "";
   const page = Number(params.get("page") ?? 1);
 
   const query = useQuery({
-    queryKey: ["admin", "donations", Object.fromEntries(params.entries()), initialStatus],
-    queryFn: async () => {
-      const common = { page, limit: 20, search: params.get("search") || undefined };
-      if (initialStatus !== "verification") return donationsApi.list({ ...common, status: status || undefined });
-      const [pending, review] = await Promise.all([
-        donationsApi.list({ ...common, status: "PENDING_PAYMENT" }),
-        donationsApi.list({ ...common, status: "MANUAL_REVIEW" }),
-      ]);
-      return { data: [...pending.data, ...review.data], meta: pending.meta };
-    },
+    queryKey: ["admin", "donations", Object.fromEntries(params.entries())],
+    queryFn: () => donationsApi.list({ page, limit: 20, search: params.get("search") || undefined, status: status || undefined }),
   });
 
   const setParams = (values: Record<string, string>) => {
@@ -104,17 +96,15 @@ export function DonationListPage({ initialStatus }: { initialStatus?: string }) 
 
   return (
     <section>
-      <PageHeader title={initialStatus ? "Perlu Verifikasi" : "Donasi"} description="Pantau transaksi dan jalankan workflow verifikasi dengan audit trail." />
+      <PageHeader title="Donasi" description="Pantau transaksi dan jalankan workflow verifikasi dengan audit trail." />
       <div className="mb-4 flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white p-3">
         <form className="flex min-w-64 flex-1" onSubmit={(event) => { event.preventDefault(); setParams({ search }); }}>
-          <div className="relative w-full"><Search className="absolute left-3 top-2.5 text-slate-400" size={17} /><input className="admin-input w-full pl-9" placeholder="Cari invoice atau donatur…" value={search} onChange={(event) => setSearch(event.target.value)} /></div>
+          <div className="relative w-full"><Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} /><input className="admin-input admin-search-input w-full" placeholder="Cari invoice atau donatur…" value={search} onChange={(event) => setSearch(event.target.value)} /></div>
         </form>
-        {!initialStatus && (
-          <select className="admin-input" value={status} onChange={(event) => setParams({ status: event.target.value })}>
-            <option value="">Semua status</option>
-            {["PENDING_PAYMENT", "MANUAL_REVIEW", "PAID", "REJECTED", "EXPIRED", "CANCELLED"].map((item) => <option value={item} key={item}>{item.replaceAll("_", " ")}</option>)}
-          </select>
-        )}
+        <select className="admin-input" value={status} onChange={(event) => setParams({ status: event.target.value })}>
+          <option value="">Semua status</option>
+          {["PENDING_PAYMENT", "MANUAL_REVIEW", "PAID", "REJECTED", "EXPIRED", "CANCELLED"].map((item) => <option value={item} key={item}>{item.replaceAll("_", " ")}</option>)}
+        </select>
       </div>
       {canDelete && selected.length > 0 && <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3"><p className="text-sm font-semibold text-red-800">{selected.length} donasi dipilih</p><button className="admin-button admin-button-danger" onClick={() => setDeleteTarget({ ids: selected, label: `${selected.length} donasi terpilih` })}><Trash2 size={16} /> Hapus terpilih</button></div>}
       {query.isError ? <ErrorState error={query.error} onRetry={() => query.refetch()} /> : <DataTable columns={columns} data={donations} loading={query.isLoading} />}
@@ -156,6 +146,15 @@ export function DonationDetailPage({ id }: { id: string }) {
     donation.inputTypeSnapshot === "QUANTITY"
       ? `${donation.quantity ?? 0} ${donation.unitLabelSnapshot ?? donation.unitNameSnapshot ?? "unit"}`
       : rupiah.format(Number(donation.baseAmount));
+  const whatsappNumber = normalizeWhatsapp(donation.donorWhatsapp);
+  const whatsappMessage = confirmationMessage({
+    donorName: donation.donorName?.trim() || donorDisplayName,
+    invoiceNumber: donation.invoiceNumber,
+    program: String(donation.campaignTitleSnapshot),
+    contribution,
+    amount: rupiah.format(Number(donation.baseAmount)),
+    quantityMode: donation.inputTypeSnapshot === "QUANTITY",
+  });
 
   return (
     <section>
@@ -301,7 +300,7 @@ export function DonationDetailPage({ id }: { id: string }) {
           </div>
           <div className="border-t border-slate-200 bg-slate-50 p-5">
             <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-400">Akses cepat</p>
-            <a className="admin-button admin-button-secondary w-full" href={`https://wa.me/${String(donation.donorWhatsapp).replace(/\D/g, "")}`} target="_blank" rel="noreferrer"><Phone size={16} /> Hubungi donatur</a>
+            <a className="admin-button admin-button-secondary w-full" href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noreferrer"><Phone size={16} /> Kirim konfirmasi WhatsApp</a>
           </div>
         </aside>
       </div>
@@ -324,6 +323,61 @@ type DonationPayment = Payment & {
   } | null;
   accountHolderSnapshot?: string | null;
 };
+
+function normalizeWhatsapp(value: string) {
+  let digits = String(value).replace(/\D/g, "");
+  if (digits.startsWith("0")) digits = `62${digits.slice(1)}`;
+  else if (digits.startsWith("8")) digits = `62${digits}`;
+  return digits;
+}
+
+function confirmationMessage({
+  donorName,
+  invoiceNumber,
+  program,
+  contribution,
+  amount,
+  quantityMode,
+}: {
+  donorName: string;
+  invoiceNumber: string;
+  program: string;
+  contribution: string;
+  amount: string;
+  quantityMode: boolean;
+}) {
+  const details = quantityMode
+    ? ["*Kontribusi*", contribution, "", "*Nilai Donasi*", amount]
+    : ["*Nominal Donasi*", amount];
+  return [
+    `Assalamu'alaikum Bapak/Ibu ${donorName},`,
+    "",
+    "Alhamdulillah, donasi Anda telah kami konfirmasi dan tercatat dalam sistem Derma Nusantara.",
+    "",
+    "*BUKTI KONFIRMASI DONASI*",
+    "━━━━━━━━━━━━━━━━━━",
+    "*Nomor Invoice*",
+    invoiceNumber,
+    "",
+    "*Nama Donatur*",
+    donorName,
+    "",
+    "*Program*",
+    program,
+    "",
+    ...details,
+    "",
+    "*Status*",
+    "Terkonfirmasi",
+    "━━━━━━━━━━━━━━━━━━",
+    "",
+    "Terima kasih atas kepercayaan dan kebaikan Anda. Semoga donasi ini menjadi amal jariyah yang terus memberikan manfaat dan keberkahan.",
+    "",
+    "Salam hangat,",
+    "*Derma Nusantara*",
+    "*Menghubungkan Kebaikan untuk Indonesia*",
+  ].join("\n");
+}
 
 function HeroInfo({ label, value }: { label: string; value: string }) {
   return <div className="min-w-0 rounded-xl bg-white/10 px-4 py-3"><p className="text-[11px] font-bold uppercase tracking-wide text-white/50">{label}</p><p className="mt-1 truncate text-sm font-semibold">{value}</p></div>;

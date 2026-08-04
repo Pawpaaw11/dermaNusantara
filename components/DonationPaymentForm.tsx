@@ -166,27 +166,27 @@ export function DonationPaymentForm({
   }
 
   return (
-    <div className="lg:sticky lg:top-28">
+    <div className="scroll-mt-24" id="donation-form">
       <div className="ambient-shadow overflow-hidden rounded-[32px] border border-outline-variant/40 bg-surface-container-lowest">
-        <div className="bg-primary px-8 py-7 text-on-primary">
-          <div className="flex items-start justify-between gap-4">
-            <div>
+        <div className="bg-primary px-5 py-6 text-on-primary sm:px-8 sm:py-7">
+          <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-4">
+            <div className="min-w-0">
               <p className="font-label-sm text-label-sm text-primary-fixed-dim">
                 Donasi terkumpul
               </p>
-              <p className="mt-2 font-headline-md text-headline-md">
+              <p className="mt-2 break-words text-[1.75rem] font-extrabold leading-tight sm:font-headline-md sm:text-headline-md">
                 {formatCurrency(program.progress.collectedAmount)}
               </p>
             </div>
-            <div className="rounded-full bg-white/10 px-4 py-2 text-right">
+            <div className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-4 py-3 sm:w-auto sm:min-w-32 sm:block sm:rounded-3xl sm:py-2 sm:text-right">
               <p className="font-label-sm text-label-sm text-primary-fixed-dim">
                 Target
               </p>
-              <p className="mt-1 font-label-md text-label-md">{targetLabel}</p>
+              <p className="font-label-md text-label-md sm:mt-1">{targetLabel}</p>
             </div>
           </div>
 
-          <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/15">
+          <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/15 sm:mt-6 sm:h-3">
             <div
               className="h-full rounded-full bg-tertiary"
               style={{
@@ -209,7 +209,7 @@ export function DonationPaymentForm({
         </div>
 
         <form
-          className="flex flex-col gap-7 px-8 py-8"
+          className="flex flex-col gap-7 px-5 py-7 sm:px-8 sm:py-8"
           onSubmit={(event) => {
             event.preventDefault();
             setSubmitError(null);

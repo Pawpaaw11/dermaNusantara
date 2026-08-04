@@ -69,6 +69,7 @@ export type Campaign = {
   categoryId: string;
   slug: string;
   title: string;
+  cardBadgeText: string | null;
   shortDescription: string;
   description: string;
   coverImageUrl: string;

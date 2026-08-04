@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, UserRound } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import {
+  CampaignAboutSection,
+  MobileDonationCta,
+  RecentDonorsSection,
+} from "@/components/DonationDetailSections";
 import { DonationPaymentForm } from "@/components/DonationPaymentForm";
 import { Footer } from "@/components/Footer";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -16,8 +21,6 @@ type DonationPageProps = {
 };
 
 export const dynamic = "force-dynamic";
-
-const currencyFormatter = new Intl.NumberFormat("id-ID");
 
 export async function generateMetadata({
   params,
@@ -56,7 +59,7 @@ export default async function DonationPage({ params }: DonationPageProps) {
     <>
       <SiteHeader />
       <main className="bg-background">
-        <section className="px-margin-mobile pb-20 pt-8 md:px-margin-desktop md:pb-24">
+        <section className="px-margin-mobile pb-36 pt-8 md:px-margin-desktop lg:pb-24">
           <div className="mx-auto grid max-w-container-max gap-10 lg:grid-cols-12 lg:gap-12">
             <article className="lg:col-span-7">
               <div className="flex flex-wrap items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
@@ -89,17 +92,10 @@ export default async function DonationPage({ params }: DonationPageProps) {
                 />
               </div>
 
-              <section className="mt-8 border-b border-outline-variant/40 pb-8">
-                <h2 className="font-headline-sm text-headline-sm text-primary">
-                  Tentang program
-                </h2>
-                <div className="mt-4 max-w-3xl space-y-5 font-body-lg text-body-lg leading-8 text-on-surface-variant">
-                  <p>{program.description}</p>
-                  {program.story.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-              </section>
+              <CampaignAboutSection
+                description={program.description}
+                story={program.story}
+              />
 
               {/* <section className="mt-8">
                 <h2 className="font-headline-sm text-headline-sm text-primary">
@@ -143,32 +139,7 @@ export default async function DonationPage({ params }: DonationPageProps) {
                 </div>
               </section> */}
 
-              <section className="mt-8">
-                <h2 className="font-headline-sm text-headline-sm text-primary">
-                  Donatur
-                </h2>
-
-                <div className="ambient-shadow mt-5 overflow-hidden rounded-lg border border-outline-variant/40 bg-surface">
-                  {program.recentDonors.map((donor) => (
-                    <div
-                      className="flex items-center justify-between gap-4 border-b border-outline-variant/30 px-6 py-5 last:border-b-0"
-                      key={`${donor.donorDisplayName}-${donor.donatedAt}`}
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-secondary">
-                          <UserRound size={20} />
-                        </div>
-                        <p className="truncate font-label-md text-label-md text-on-background">
-                          {donor.donorDisplayName}
-                        </p>
-                      </div>
-                      <p className="shrink-0 font-label-md text-label-md text-primary">
-                        Rp {currencyFormatter.format(donor.amount)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <RecentDonorsSection donors={program.recentDonors} />
             </article>
 
             <aside className="lg:col-span-5">
@@ -178,6 +149,7 @@ export default async function DonationPage({ params }: DonationPageProps) {
         </section>
       </main>
       <Footer />
+      <MobileDonationCta />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
     </>
   );

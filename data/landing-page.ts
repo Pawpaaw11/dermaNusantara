@@ -368,14 +368,6 @@ export const articles = [
   },
 ];
 
-export const footerLinks = [
-  "Privacy Policy",
-  "Terms of Service",
-  "Donation Guide",
-  "Impact Reports",
-  "Contact Us",
-];
-
 export const testimonials = [
   {
     name: "M. Fawwaz",
