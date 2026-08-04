@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { MapPin, MessageCircle, Phone } from "lucide-react";
 
 const legalLinks = [
   { label: "Kebijakan Privasi", href: "/kebijakan-privasi" },
@@ -32,7 +32,6 @@ export function Footer() {
           <div className="mt-4 space-y-3 text-sm text-on-surface-variant">
             <a className="flex items-center gap-3 transition-colors hover:text-primary" href="tel:+6281357035751"><Phone aria-hidden size={18}/>081357035751</a>
             <a className="flex items-center gap-3 transition-colors hover:text-primary" href="https://wa.me/6281357035751" rel="noreferrer" target="_blank"><MessageCircle aria-hidden size={18}/>WhatsApp</a>
-            <a className="flex items-center gap-3 break-all transition-colors hover:text-primary" href="mailto:Quantumspirit.edu@gmail.com"><Mail aria-hidden size={18}/>Quantumspirit.edu@gmail.com</a>
             <a className="flex items-start gap-3 leading-6 transition-colors hover:text-primary" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`} rel="noreferrer" target="_blank"><MapPin aria-hidden className="mt-0.5 shrink-0" size={18}/><span>{address}</span></a>
           </div>
         </div>
