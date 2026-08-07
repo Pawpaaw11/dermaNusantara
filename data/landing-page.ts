@@ -367,24 +367,3 @@ export const articles = [
     },
   },
 ];
-
-export const testimonials = [
-  {
-    name: "M. Fawwaz",
-    role: "Donatur",
-    quote:
-      "Tampilan websitenya mudah dipahami. Sejak pertama kali membuka, saya bisa melihat pilihan program dan informasi donasi dengan jelas.",
-  },
-  {
-    name: "Ayu Daffa",
-    role: "Donatur",
-    quote:
-      "Proses memilih program hingga mendapatkan informasi pembayaran terasa sederhana. Semoga Derma Nusantara terus menjaga keterbukaan informasinya.",
-  },
-  {
-    name: "M. Faaiz",
-    role: "Donatur",
-    quote:
-      "Peluncuran website ini membuat akses ke program kebaikan terasa lebih praktis. Saya berharap kabar kegiatan dan penyalurannya dapat diperbarui secara rutin.",
-  },
-];

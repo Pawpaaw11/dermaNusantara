@@ -29,6 +29,11 @@ export type HeroSlide = {
   isActive: boolean; sortOrder: number; createdAt: string; updatedAt: string;
 };
 
+export type Testimonial = {
+  id: string; name: string; role?: string | null; quote: string; photoUrl?: string | null;
+  isActive: boolean; sortOrder: number; createdAt: string; updatedAt: string;
+};
+
 export type AdminProfile = {
   id: string;
   email: string;

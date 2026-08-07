@@ -14,6 +14,7 @@ import type {
   Article,
   ArticleCategory,
   HeroSlide,
+  Testimonial,
 } from "./types";
 
 export function resourceApi<T>(resource: string) {
@@ -157,6 +158,14 @@ export const heroSlidesApi = {
   reorder: (ids: string[]) => adminRequest<HeroSlide[]>("hero-slides/reorder", { method: "PUT", body: JSON.stringify({ ids }) }),
   toggle: (id: string, active: boolean) => adminRequest<HeroSlide>(`hero-slides/${id}/${active ? "activate" : "deactivate"}`, { method: "PATCH", body: "{}" }),
   remove: (id: string) => adminRequest<{ success: boolean }>(`hero-slides/${id}`, { method: "DELETE" }),
+};
+export const testimonialsApi = {
+  list: () => adminRequest<Testimonial[]>("testimonials"),
+  create: (input: unknown) => adminRequest<Testimonial>("testimonials", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, input: unknown) => adminRequest<Testimonial>(`testimonials/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  reorder: (ids: string[]) => adminRequest<Testimonial[]>("testimonials/reorder", { method: "PUT", body: JSON.stringify({ ids }) }),
+  toggle: (id: string, active: boolean) => adminRequest<Testimonial>(`testimonials/${id}/${active ? "activate" : "deactivate"}`, { method: "PATCH", body: "{}" }),
+  remove: (id: string) => adminRequest<{ success: boolean }>(`testimonials/${id}`, { method: "DELETE" }),
 };
 
 export const settingsApi = {

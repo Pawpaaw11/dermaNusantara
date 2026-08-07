@@ -50,11 +50,15 @@ export async function ProgramHighlights() {
       <div className="mx-auto max-w-container-max">
         <div className="mb-10 space-y-3 text-center md:mb-16 md:space-y-4">
           <h2 className="font-headline-md text-headline-md text-primary">
-            Program Kebaikan
+            Pilih Jejak Kebaikan yang Ingin Anda Tinggalkan
           </h2>
-          <p className="mx-auto max-w-2xl font-body-md text-body-md text-on-surface-variant">
-            Pilih jalan kebaikanmu hari ini. Sedikit dari kita, sangat berarti
-            bagi mereka.
+          <p className="mx-auto max-w-4xl font-body-md text-body-md leading-7 text-on-surface-variant">
+            Setiap orang memiliki cara berbeda dalam menjemput pahala. Ada yang
+            memilih menghadiahkan Al-Qur&apos;an, ada yang menguatkan langkah para
+            santri, dan ada pula yang menjaga agar roda pendidikan Islam terus
+            berputar. Pilih program yang paling dekat dengan hati Anda, lalu
+            jadilah bagian dari manfaat yang terus hidup bahkan setelah kita
+            tiada.
           </p>
         </div>
 
@@ -90,9 +94,6 @@ export async function ProgramHighlights() {
                   unoptimized={program.coverImageUrl.includes("/uploads/")}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/25 to-transparent" />
-                <div className="absolute left-4 top-4 rounded bg-primary px-2.5 py-1.5 font-label-sm text-label-sm text-on-primary shadow-sm md:left-5 md:top-5 md:px-3 md:py-2">
-                  {program.category.name} Derma Nusantara
-                </div>
                 <p className="absolute bottom-4 left-4 max-w-[190px] font-headline-sm text-[1.1rem] font-bold uppercase leading-6 text-on-primary md:bottom-5 md:left-5 md:max-w-[220px] md:text-headline-sm">
                   {program.title}
                 </p>
@@ -145,7 +146,7 @@ export async function ProgramHighlights() {
                 className="block w-full bg-primary py-3.5 text-center font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container focus-visible:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim md:py-4"
                 href={`/donasi/${program.slug}`}
               >
-                Donasi
+                Ambil Bagian
               </Link>
             </article>
             );
